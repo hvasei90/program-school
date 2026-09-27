@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Python Toolkit Lab — محیط تعاملی معرفی کتابخانه‌ها و ابزارهای پایتون">
+  <title>Python Toolkit Lab</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+
+  <header class="topbar">
+    <div class="brand" id="homeBtn" role="button" tabindex="0">
+      <div class="brand-mark">{ }</div>
+      <div>
+        <strong>Python Toolkit</strong>
+        <span>LAB</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="themeBtn" title="تغییر حالت نمایش">☼</button>
+      <button class="present-btn" id="presentBtn">▶ حالت ارائه</button>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <div>
+          <span class="eyebrow">INTERACTIVE LIBRARY</span>
+          <h2>جعبه‌ابزار پایتون</h2>
+        </div>
+        <span class="count-badge" id="toolCount">0</span>
+      </div>
+      <div class="search-wrap">
+        <span>⌕</span>
+        <input id="searchInput" placeholder="جستجوی کتابخانه یا متد..." autocomplete="off">
+      </div>
+      <div class="category-row" id="categoryRow"></div>
+      <nav id="libraryNav"></nav>
+    </aside>
+
+    <section class="workspace">
+      <div class="hero" id="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">PYTHON • FILES • DATA • AUTOMATION</span>
+          <h1>کد را <span>ببین، لمس کن، بساز.</span></h1>
+          <p>
+            یک آزمایشگاه تعاملی برای نمایش کتابخانه‌ها، متدها و ترکیب آن‌ها؛
+            به‌جای جابه‌جایی بین محیط کدنویسی و File Explorer، همه‌چیز اینجاست.
+          </p>
+          <div class="hero-actions">
+            <button class="primary-btn" id="startBtn">شروع آزمایشگاه ←</button>
+            <button class="ghost-btn" id="randomBtn">یک ابزار تصادفی ✦</button>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="terminal-card">
+            <div class="terminal-top"><i></i><i></i><i></i><span>python_lab.py</span></div>
+            <pre><code><b>from</b> pathlib <b>import</b> Path
+
+files = Path(<em>"project"</em>).glob(<em>"*.py"</em>)
+
+<b>for</b> file <b>in</b> files:
+    print(file.name)</code></pre>
+            <div class="terminal-output">✓ نتیجه آماده است <span>3 فایل پیدا شد</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-strip">
+        <div><b id="libraryStat">0</b><span>کتابخانه</span></div>
+        <div><b id="methodStat">0</b><span>ابزار و متد</span></div>
+        <div><b>100%</b><span>مناسب GitHub Pages</span></div>
+        <div><b>∞</b><span>ترکیب‌های ممکن</span></div>
+      </div>
+
+      <div class="section-head" id="explore">
+        <div>
+          <span class="eyebrow">EXPLORE</span>
+          <h2>کتابخانه‌ها را انتخاب کن</h2>
+        </div>
+        <span class="hint">روی هر کارت بزن و وارد آزمایشگاه شو</span>
+      </div>
+      <div class="library-grid" id="libraryGrid"></div>
+
+      <section class="lab-section" id="labSection">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">INTERACTIVE LAB</span>
+            <h2 id="labTitle">آزمایشگاه</h2>
+          </div>
+          <button class="ghost-btn small" id="clearBuilder">پاک‌کردن زنجیره</button>
+        </div>
+
+        <div class="lab-layout">
+          <div class="tool-panel">
+            <div class="panel-title">
+              <span>ابزارهای این کتابخانه</span>
+              <span class="mini-help">برای اطلاعات بیشتر روی ? بزن</span>
+            </div>
+            <div id="toolList" class="tool-list"></div>
+          </div>
+
+          <div class="builder-panel">
+            <div class="builder-head">
+              <div>
+                <span class="eyebrow">CODE BUILDER</span>
+                <h3>زنجیره‌ی کد</h3>
+              </div>
+              <button class="run-btn" id="runChain">▶ اجرای آزمایشی</button>
+            </div>
+            <div id="chain" class="chain empty">
+              <div class="empty-chain">
+                <div class="drop-icon">＋</div>
+                <b>بلوک‌ها را اینجا جمع کن</b>
+                <span>با کلیک روی هر ابزار، یک بلوک به کد اضافه می‌شود.</span>
+              </div>
+            </div>
+            <div class="code-preview">
+              <div class="code-head"><span>Generated Python</span><button id="copyCode">کپی</button></div>
+              <pre id="generatedCode"><code># برای ساخت کد، یک ابزار انتخاب کنید...</code></pre>
+            </div>
+            <div class="result-card" id="resultCard">
+              <div class="result-head"><span>LIVE PREVIEW</span><span id="resultStatus">آماده</span></div>
+              <div id="resultBody">یک ابزار را انتخاب کن تا پیش‌نمایش آن نمایش داده شود.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="showcase" id="showcase">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">PRESENTATION MODE</span>
+            <h2>ویژگی‌هایی که برای ارائه ساخته شده‌اند</h2>
+          </div>
+        </div>
+        <div class="feature-grid">
+          <article><span>01</span><h3>نمایش زنده</h3><p>هر ابزار یک پیش‌نمایش قابل مشاهده دارد تا مفهوم آن فقط در متن باقی نماند.</p></article>
+          <article><span>02</span><h3>ساخت کد</h3><p>بلوک‌ها را پشت سر هم انتخاب کن و نمونه‌ی Python ساخته‌شده را ببین.</p></article>
+          <article><span>03</span><h3>راهنمای سریع</h3><p>علامت ? کنار هر ابزار، کاربرد، آرگومان‌ها و خروجی احتمالی را توضیح می‌دهد.</p></article>
+          <article><span>04</span><h3>بدون بک‌اند</h3><p>نسخه‌ی اصلی کاملاً استاتیک است و برای GitHub Pages طراحی شده است.</p></article>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <button class="modal-close" id="modalClose">×</button>
+      <span class="eyebrow">TOOL DETAILS</span>
+      <h2 id="modalTitle"></h2>
+      <p id="modalDesc"></p>
+      <div class="signature" id="modalSignature"></div>
+      <div class="modal-grid">
+        <div><b>چه کاری انجام می‌دهد؟</b><span id="modalWhat"></span></div>
+        <div><b>آرگومان‌ها</b><span id="modalArgs"></span></div>
+        <div><b>نوع</b><span id="modalType"></span></div>
+        <div><b>خروجی / نتیجه</b><span id="modalOutput"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
