@@ -136,8 +136,8 @@ const LIBS = [
       ["stop()","توقف نظارت","observer.stop()","—","نظارت را متوقف می‌کند","بدون خروجی"],
       ["join()","منتظر ماندن","observer.join()","—","تا پایان thread صبر می‌کند","بدون خروجی"],
       ["on_created()","واکنش به ساخت","on_created(event)","event","هنگام ساخت فایل اجرا می‌شود","بدون خروجی"],
-      ["on_deleted()","واکنش به حذف","on_deleted(event)","event","هنگام حذف اجرا می‌شود","بدون خروجی"],
-      ["on_modified()","واکنش به تغییر","on_modified(event)","event","هنگام تغییر اجرا می‌شود","بدون خروجی"],
+      ["on_deleted()","واکنش به حذف","on_deleted(event)","event","هنگام حذف فایل اجرا می‌شود","بدون خروجی"],
+      ["on_modified()","واکنش به تغییر","on_modified(event)","event","هنگام تغییر فایل اجرا می‌شود","بدون خروجی"],
       ["on_moved()","واکنش به جابه‌جایی","on_moved(event)","event","هنگام جابه‌جایی اجرا می‌شود","بدون خروجی"]
     ]
   },
@@ -470,6 +470,7 @@ const LIBS = [
   }
 ];
 
+
 /* =========================================================
    STATE
    ========================================================= */
@@ -491,13 +492,49 @@ const allTools = () =>
    ========================================================= */
 
 const INITIAL_FILES = [
-  {type:"file",name:"photo.jpg",size:"2.4 MB",kind:"image"},
-  {type:"file",name:"video.mp4",size:"18.7 MB",kind:"video"},
-  {type:"file",name:"report.docx",size:"84 KB",kind:"word"},
-  {type:"file",name:"presentation.pptx",size:"1.2 MB",kind:"powerpoint"},
-  {type:"file",name:"students.csv",size:"12 KB",kind:"csv"},
-  {type:"file",name:"data.xlsx",size:"31 KB",kind:"excel"},
-  {type:"file",name:"notes.txt",size:"4 KB",kind:"text"}
+  {
+    type:"file",
+    name:"photo.jpg",
+    size:"2.4 MB",
+    kind:"image"
+  },
+  {
+    type:"file",
+    name:"video.mp4",
+    size:"18.7 MB",
+    kind:"video"
+  },
+  {
+    type:"file",
+    name:"report.docx",
+    size:"84 KB",
+    kind:"word"
+  },
+  {
+    type:"file",
+    name:"presentation.pptx",
+    size:"1.2 MB",
+    kind:"powerpoint"
+  },
+  {
+    type:"file",
+    name:"students.csv",
+    size:"12 KB",
+    kind:"csv"
+  },
+  {
+    type:"file",
+    name:"data.xlsx",
+    size:"31 KB",
+    kind:"excel"
+  },
+  {
+    type:"file",
+    name:"notes.txt",
+    size:"4 KB",
+    kind:"text",
+    content:"Hello Python!\nاین یک فایل متنی نمایشی است."
+  }
 ];
 
 const VFS = {
@@ -509,6 +546,7 @@ const VFS = {
 };
 
 let selectedPath = null;
+let currentExplorerPath = "";
 let liveLog = [];
 
 
@@ -538,7 +576,9 @@ function init(){
 
   if($("randomBtn"))
     $("randomBtn").onclick = () =>
-      selectLib(LIBS[Math.floor(Math.random()*LIBS.length)].id);
+      selectLib(
+        LIBS[Math.floor(Math.random()*LIBS.length)].id
+      );
 
   if($("clearBuilder"))
     $("clearBuilder").onclick = () => {
@@ -557,7 +597,8 @@ function init(){
 
   if($("modalBackdrop"))
     $("modalBackdrop").onclick = e => {
-      if(e.target.id === "modalBackdrop") closeModal();
+      if(e.target.id === "modalBackdrop")
+        closeModal();
     };
 
   if($("themeBtn"))
@@ -566,7 +607,9 @@ function init(){
 
   if($("presentBtn"))
     $("presentBtn").onclick = () => {
+
       document.body.classList.toggle("presentation");
+
       toast(
         document.body.classList.contains("presentation")
           ? "حالت ارائه فعال شد"
@@ -576,7 +619,10 @@ function init(){
 
   if($("homeBtn"))
     $("homeBtn").onclick = () =>
-      window.scrollTo({top:0,behavior:"smooth"});
+      window.scrollTo({
+        top:0,
+        behavior:"smooth"
+      });
 
   if($("searchInput"))
     $("searchInput").oninput = renderNav;
@@ -592,19 +638,29 @@ function init(){
 
 function renderCategories(){
 
-  const cats = ["همه", ...new Set(LIBS.map(x => x.cat))];
+  const cats = [
+    "همه",
+    ...new Set(LIBS.map(x => x.cat))
+  ];
 
   const row = $("categoryRow");
-  if(!row) return;
+
+  if(!row)
+    return;
 
   row.innerHTML = cats.map(c =>
     `<button class="cat ${c===state.category?"active":""}"
-      data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`
+      data-cat="${escapeHtml(c)}">
+      ${escapeHtml(c)}
+    </button>`
   ).join("");
 
   document.querySelectorAll(".cat").forEach(b => {
+
     b.onclick = () => {
+
       state.category = b.dataset.cat;
+
       renderCategories();
       renderNav();
       renderCards();
@@ -615,9 +671,10 @@ function renderCategories(){
 
 function filteredLibs(){
 
-  const q = ($("searchInput")?.value || "")
-    .trim()
-    .toLowerCase();
+  const q =
+    ($("searchInput")?.value || "")
+      .trim()
+      .toLowerCase();
 
   return LIBS.filter(l => {
 
@@ -639,22 +696,33 @@ function filteredLibs(){
 function renderNav(){
 
   const libs = filteredLibs();
-
   const nav = $("libraryNav");
-  if(!nav) return;
+
+  if(!nav)
+    return;
 
   nav.innerHTML =
     libs.map(l =>
       `<div class="nav-item ${l.id===state.lib?"active":""}"
         data-id="${escapeHtml(l.id)}">
-        <span class="nav-icon">${l.icon}</span>
-        <span>${escapeHtml(l.name)}</span>
+
+        <span class="nav-icon">
+          ${l.icon}
+        </span>
+
+        <span>
+          ${escapeHtml(l.name)}
+        </span>
+
       </div>`
     ).join("") ||
-    `<div class="nav-group-title">موردی پیدا نشد.</div>`;
+    `<div class="nav-group-title">
+      موردی پیدا نشد.
+    </div>`;
 
   document.querySelectorAll(".nav-item").forEach(x =>
-    x.onclick = () => selectLib(x.dataset.id)
+    x.onclick = () =>
+      selectLib(x.dataset.id)
   );
 }
 
@@ -663,19 +731,37 @@ function renderCards(){
 
   const libs = filteredLibs();
   const grid = $("libraryGrid");
-  if(!grid) return;
+
+  if(!grid)
+    return;
 
   grid.innerHTML = libs.map(l =>
-    `<article class="lib-card" data-id="${escapeHtml(l.id)}">
-      <div class="lib-icon">${l.icon}</div>
-      <h3>${escapeHtml(l.name)}</h3>
-      <p>${escapeHtml(l.desc)}</p>
-      <span class="lib-meta">${l.tools.length} ابزار</span>
+    `<article
+      class="lib-card"
+      data-id="${escapeHtml(l.id)}">
+
+      <div class="lib-icon">
+        ${l.icon}
+      </div>
+
+      <h3>
+        ${escapeHtml(l.name)}
+      </h3>
+
+      <p>
+        ${escapeHtml(l.desc)}
+      </p>
+
+      <span class="lib-meta">
+        ${l.tools.length} ابزار
+      </span>
+
     </article>`
   ).join("");
 
   document.querySelectorAll(".lib-card").forEach(x =>
-    x.onclick = () => selectLib(x.dataset.id)
+    x.onclick = () =>
+      selectLib(x.dataset.id)
   );
 }
 
@@ -685,26 +771,46 @@ function selectLib(id){
   state.lib = id;
 
   const l = LIBS.find(x => x.id === id);
-  if(!l) return;
+
+  if(!l)
+    return;
 
   if($("labTitle"))
-    $("labTitle").textContent = l.name + " — آزمایشگاه";
+    $("labTitle").textContent =
+      l.name + " — آزمایشگاه";
 
   if($("toolList"))
-    $("toolList").innerHTML = l.tools.map((t,i) =>
-      `<div class="tool-card" data-i="${i}">
-        <div>
-          <div class="tool-name">${escapeHtml(t[0])}</div>
-          <div class="tool-desc">${escapeHtml(t[1])}</div>
-        </div>
-        <button class="help-btn" data-help="${i}">?</button>
-      </div>`
-    ).join("");
+    $("toolList").innerHTML =
+      l.tools.map((t,i) =>
+        `<div
+          class="tool-card"
+          data-i="${i}">
+
+          <div>
+            <div class="tool-name">
+              ${escapeHtml(t[0])}
+            </div>
+
+            <div class="tool-desc">
+              ${escapeHtml(t[1])}
+            </div>
+          </div>
+
+          <button
+            class="help-btn"
+            data-help="${i}">
+            ?
+          </button>
+
+        </div>`
+      ).join("");
 
   document.querySelectorAll(".tool-card").forEach(c => {
 
     c.onclick = e => {
-      if(e.target.classList.contains("help-btn")) return;
+
+      if(e.target.classList.contains("help-btn"))
+        return;
 
       const tool =
         l.tools[Number(c.dataset.i)];
@@ -716,6 +822,7 @@ function selectLib(id){
   document.querySelectorAll(".help-btn").forEach(b => {
 
     b.onclick = e => {
+
       e.stopPropagation();
 
       openModal(
@@ -741,13 +848,20 @@ function selectLib(id){
 
 function parseSignatureArgs(signature){
 
-  const m = signature.match(/\((.*)\)/);
+  const m =
+    signature.match(/\((.*)\)/);
 
-  if(!m) return [];
+  if(!m)
+    return [];
 
-  const body = m[1].trim();
+  const body =
+    m[1].trim();
 
-  if(!body || body==="..." || body==="—")
+  if(
+    !body ||
+    body==="..." ||
+    body==="—"
+  )
     return [];
 
   return body
@@ -765,11 +879,24 @@ function parseSignatureArgs(signature){
 
 function defaultValueForArg(arg){
 
-  const selected = selectedPath || "";
+  const selected =
+    selectedPath || "";
 
   if(
-    ["path","filename","source","url","name","src","dst",
-     "f1","f2","pdf_path","database","lock_file"].includes(arg)
+    [
+      "path",
+      "filename",
+      "source",
+      "url",
+      "name",
+      "src",
+      "dst",
+      "f1",
+      "f2",
+      "pdf_path",
+      "database",
+      "lock_file"
+    ].includes(arg)
   ){
     return selected;
   }
@@ -807,25 +934,70 @@ function defaultValueForArg(arg){
   if(arg === "tag")
     return "demo";
 
+  if(arg === "encoding")
+    return "utf-8";
+
+  if(arg === "target")
+    return "new_name.txt";
+
+  if(arg === "title")
+    return "NewSheet";
+
+  if(arg === "level")
+    return "1";
+
+  if(arg === "cmd")
+    return "python";
+
   return "";
 }
 
 
 function isOptionalArg(t,arg,index){
 
-  const signature = t[2] || "";
-  const info = (t[3] || "") + " " + signature;
+  const signature =
+    t[2] || "";
+
+  const info =
+    (t[3] || "") + " " + signature;
+
+  /*
+    قبلاً فقط index > 0 بررسی می‌شد.
+    حالا اگر خود آرگومان اختیاری باشد،
+    حتی آرگومان اول هم اختیاری محسوب می‌شود.
+  */
+
+  const argOptional =
+    /اختیاری/i.test(
+      (t[3] || "")
+    ) &&
+    new RegExp(
+      `\\b${arg}\\b`
+    ).test(t[3] || "");
+
+  const signatureOptional =
+    new RegExp(
+      `${arg}\\s*=`
+    ).test(signature) ||
+    new RegExp(
+      `${arg}\\s*=\\s*None`
+    ).test(signature);
 
   return (
-    /optional|اختیاری|None/i.test(info) &&
-    index > 0
+    argOptional ||
+    signatureOptional ||
+    (
+      /optional|اختیاری|None/i.test(info) &&
+      index > 0
+    )
   );
 }
 
 
 function askToolArgs(t){
 
-  const args = parseSignatureArgs(t[2]);
+  const args =
+    parseSignatureArgs(t[2]);
 
   if(!args.length)
     return {};
@@ -837,23 +1009,42 @@ function askToolArgs(t){
     const arg = args[i];
 
     if(
-      ["layout","options","kwargs","fn","iterable",
-       "handler","event","worksheet","other",
-       "element","root","job","trigger"].includes(arg)
+      [
+        "layout",
+        "options",
+        "kwargs",
+        "fn",
+        "iterable",
+        "handler",
+        "event",
+        "worksheet",
+        "other",
+        "element",
+        "root",
+        "job",
+        "trigger"
+      ].includes(arg)
     ){
+
       values[arg] = arg;
       continue;
     }
 
     const optional =
-      isOptionalArg(t,arg,i);
+      isOptionalArg(
+        t,
+        arg,
+        i
+      );
 
-    const def = defaultValueForArg(arg);
+    const def =
+      defaultValueForArg(arg);
 
-    const v = prompt(
-      `مقدار ${arg} را وارد کن${optional?" (اختیاری)":""}:`,
-      def
-    );
+    const v =
+      prompt(
+        `مقدار ${arg} را وارد کن${optional?" (اختیاری)":""}:`,
+        def
+      );
 
     if(v === null)
       return null;
@@ -872,16 +1063,20 @@ function askToolArgs(t){
 
 function fillSignature(signature,args){
 
-  return signature.replace(
-    /([A-Za-z_][\w]*)\s*=\s*[^,)]+/g,
-    "$1"
-  ).replace(
-    /([A-Za-z_][\w]*)/g,
-    m =>
-      Object.prototype.hasOwnProperty.call(args,m)
-        ? JSON.stringify(args[m])
-        : m
-  );
+  return signature
+
+    .replace(
+      /([A-Za-z_][\w]*)\s*=\s*[^,)]+/g,
+      "$1"
+    )
+
+    .replace(
+      /([A-Za-z_][\w]*)/g,
+      m =>
+        Object.prototype.hasOwnProperty.call(args,m)
+          ? JSON.stringify(args[m])
+          : m
+    );
 }
 
 
@@ -891,7 +1086,8 @@ function fillSignature(signature,args){
 
 function addTool(t,l){
 
-  const args = askToolArgs(t);
+  const args =
+    askToolArgs(t);
 
   if(args === null)
     return;
@@ -899,7 +1095,10 @@ function addTool(t,l){
   const customized = [
     t[0],
     t[1],
-    fillSignature(t[2],args),
+    fillSignature(
+      t[2],
+      args
+    ),
     t[3],
     t[4],
     t[5],
@@ -926,7 +1125,9 @@ function addTool(t,l){
 function renderChain(){
 
   const c = $("chain");
-  if(!c) return;
+
+  if(!c)
+    return;
 
   if(!state.chain.length){
 
@@ -934,40 +1135,58 @@ function renderChain(){
 
     c.innerHTML = `
       <div class="empty-chain">
-        <div class="drop-icon">＋</div>
-        <b>بلوک‌ها را اینجا جمع کن</b>
+
+        <div class="drop-icon">
+          ＋
+        </div>
+
+        <b>
+          بلوک‌ها را اینجا جمع کن
+        </b>
+
         <span>
           با کلیک روی هر ابزار، یک بلوک به کد اضافه می‌شود.
         </span>
+
       </div>
     `;
 
     generateCode();
+
     return;
   }
 
   c.className = "chain";
 
-  c.innerHTML = state.chain.map((x,i) =>
-    `<div class="chain-block">
-      <span class="chain-index">
-        ${String(i+1).padStart(2,"0")}
-      </span>
+  c.innerHTML =
+    state.chain.map((x,i) =>
+      `<div class="chain-block">
 
-      <code>${escapeHtml(x.tool[2])}</code>
+        <span class="chain-index">
+          ${String(i+1).padStart(2,"0")}
+        </span>
 
-      <button class="remove-block" data-i="${i}">
-        ×
-      </button>
-    </div>`
-  ).join("");
+        <code>
+          ${escapeHtml(x.tool[2])}
+        </code>
+
+        <button
+          class="remove-block"
+          data-i="${i}">
+          ×
+        </button>
+
+      </div>`
+    ).join("");
 
   document.querySelectorAll(".remove-block").forEach(b =>
     b.onclick = () => {
+
       state.chain.splice(
         Number(b.dataset.i),
         1
       );
+
       renderChain();
     }
   );
@@ -979,49 +1198,119 @@ function renderChain(){
 function importLine(lib){
 
   const map = {
-    "os":"import os",
-    "pathlib":"from pathlib import Path",
-    "shutil":"import shutil",
-    "concurrent.futures":"from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor",
-    "hashlib":"import hashlib",
-    "openpyxl":"from openpyxl import Workbook, load_workbook",
-    "pandas":"import pandas as pd",
-    "watchdog":"from watchdog.observers import Observer",
-    "schedule":"import schedule",
-    "Send2Trash":"from send2trash import send2trash",
-    "fnmatch":"from fnmatch import fnmatch, filter",
-    "filecmp":"import filecmp",
-    "tempfile":"import tempfile",
-    "stat":"import stat",
-    "io":"import io",
-    "mimetypes":"import mimetypes",
-    "tarfile":"import tarfile",
-    "gzip / bz2 / lzma":"import gzip\nimport bz2\nimport lzma",
-    "requests":"import requests",
-    "argparse":"import argparse",
-    "xml.etree.ElementTree":"import xml.etree.ElementTree as ET",
-    "configparser":"import configparser",
-    "time":"import time",
-    "sys / platform":"import sys\nimport platform",
-    "threading / multiprocessing":"import threading\nimport multiprocessing",
-    "sqlite3":"import sqlite3",
-    "PDF tools":"# PDF library imports depend on the selected tool",
-    "python-docx":"from docx import Document",
-    "python-pptx":"from pptx import Presentation",
-    "watchfiles":"from watchfiles import watch",
-    "APScheduler":"from apscheduler.schedulers.background import BackgroundScheduler",
-    "httpx":"import httpx",
-    "filelock":"from filelock import FileLock"
+
+    "os":
+      "import os",
+
+    "pathlib":
+      "from pathlib import Path",
+
+    "shutil":
+      "import shutil",
+
+    "concurrent.futures":
+      "from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor",
+
+    "hashlib":
+      "import hashlib",
+
+    "openpyxl":
+      "from openpyxl import Workbook, load_workbook",
+
+    "pandas":
+      "import pandas as pd",
+
+    "watchdog":
+      "from watchdog.observers import Observer",
+
+    "schedule":
+      "import schedule",
+
+    "Send2Trash":
+      "from send2trash import send2trash",
+
+    "fnmatch":
+      "from fnmatch import fnmatch, filter",
+
+    "filecmp":
+      "import filecmp",
+
+    "tempfile":
+      "import tempfile",
+
+    "stat":
+      "import stat",
+
+    "io":
+      "import io",
+
+    "mimetypes":
+      "import mimetypes",
+
+    "tarfile":
+      "import tarfile",
+
+    "gzip / bz2 / lzma":
+      "import gzip\nimport bz2\nimport lzma",
+
+    "requests":
+      "import requests",
+
+    "argparse":
+      "import argparse",
+
+    "xml.etree.ElementTree":
+      "import xml.etree.ElementTree as ET",
+
+    "configparser":
+      "import configparser",
+
+    "time":
+      "import time",
+
+    "sys / platform":
+      "import sys\nimport platform",
+
+    "threading / multiprocessing":
+      "import threading\nimport multiprocessing",
+
+    "sqlite3":
+      "import sqlite3",
+
+    "PDF tools":
+      "# PDF library imports depend on the selected tool",
+
+    "python-docx":
+      "from docx import Document",
+
+    "python-pptx":
+      "from pptx import Presentation",
+
+    "watchfiles":
+      "from watchfiles import watch",
+
+    "APScheduler":
+      "from apscheduler.schedulers.background import BackgroundScheduler",
+
+    "httpx":
+      "import httpx",
+
+    "filelock":
+      "from filelock import FileLock"
   };
 
-  return map[lib] || `# import ${lib}`;
+  return map[lib] ||
+    `# import ${lib}`;
 }
 
 
 function generateCode(){
 
-  const box = $("generatedCode");
-  if(!box) return;
+  const box =
+    $("generatedCode");
+
+  if(!box)
+    return;
 
   if(!state.chain.length){
 
@@ -1035,7 +1324,8 @@ function generateCode(){
 
   state.chain.forEach(x => {
 
-    const line = importLine(x.lib);
+    const line =
+      importLine(x.lib);
 
     if(!imports.includes(line))
       imports.push(line);
@@ -1044,10 +1334,13 @@ function generateCode(){
   const lines = [
     ...imports,
     "",
-    ...state.chain.map(x => x.tool[2])
+    ...state.chain.map(
+      x => x.tool[2]
+    )
   ];
 
-  box.textContent = lines.join("\n");
+  box.textContent =
+    lines.join("\n");
 }
 
 
@@ -1059,7 +1352,10 @@ function runChain(){
 
   if(!state.chain.length){
 
-    toast("اول چند بلوک به زنجیره اضافه کن.");
+    toast(
+      "اول چند بلوک به زنجیره اضافه کن."
+    );
+
     return;
   }
 
@@ -1068,11 +1364,12 @@ function runChain(){
 
   for(const item of state.chain){
 
-    const handled = statePreview(
-      item.tool,
-      {name:item.lib},
-      item.args || {}
-    );
+    const handled =
+      statePreview(
+        item.tool,
+        {name:item.lib},
+        item.args || {}
+      );
 
     if(handled)
       success++;
@@ -1087,16 +1384,23 @@ function runChain(){
 
     <div class="state-count">
       ${success} مرحله شبیه‌سازی شد
-      ${failed ? ` و ${failed} مرحله فقط پیش‌نمایش شد.` : "."}
+      ${
+        failed
+          ? ` و ${failed} مرحله فقط پیش‌نمایش شد.`
+          : "."
+      }
     </div>
 
     <p>
-      تغییرات واقعی محیط نمایشی در File Explorer قابل مشاهده است.
+      تغییرات واقعی محیط نمایشی
+      در File Explorer قابل مشاهده است.
     </p>
   `;
 
   $("resultStatus").textContent =
-    failed ? "SIMULATED ✓" : "EXECUTED ✓";
+    failed
+      ? "SIMULATED ✓"
+      : "EXECUTED ✓";
 
   renderFileExplorer();
 
@@ -1122,8 +1426,31 @@ function preview(t,l,args={}){
     html = `
       مسیر فعلی:
       <br>
+
       <span class="preview-file">
-        📁 <b>PythonToolkitLab</b> / demo
+        📁 <b>PythonLab</b>
+      </span>
+    `;
+  }
+
+  else if(n === "Path()"){
+
+    const path =
+      args.path || ".";
+
+    html = `
+      <div class="live-success">
+        ◈ Path object ساخته شد
+      </div>
+
+      <p>
+        <code dir="ltr">
+          Path(${JSON.stringify(path)})
+        </code>
+      </p>
+
+      <span style="color:#7e8aa5">
+        نوع خروجی: pathlib.Path
       </span>
     `;
   }
@@ -1131,10 +1458,21 @@ function preview(t,l,args={}){
   else if(n === "listdir()"){
 
     html = `
-      <div class="preview-file">📄 students.csv</div>
-      <div class="preview-file">📄 report.xlsx</div>
-      <div class="preview-file">📁 data</div>
-      <div class="preview-file">📁 output</div>
+      <div class="preview-file">
+        📄 students.csv
+      </div>
+
+      <div class="preview-file">
+        📄 report.xlsx
+      </div>
+
+      <div class="preview-file">
+        📁 data
+      </div>
+
+      <div class="preview-file">
+        📁 output
+      </div>
     `;
   }
 
@@ -1144,6 +1482,7 @@ function preview(t,l,args={}){
       <div class="preview-progress">
         <i></i>
       </div>
+
       <p>
         داده‌ی <b>Hello Python</b>
         → SHA-256
@@ -1175,38 +1514,49 @@ function preview(t,l,args={}){
 
     html = `
       <table class="preview-table">
+
         <tr>
           <th>name</th>
           <th>score</th>
           <th>city</th>
         </tr>
+
         <tr>
           <td>Ali</td>
           <td>20</td>
           <td>Tehran</td>
         </tr>
+
         <tr>
           <td>Sara</td>
           <td>18</td>
           <td>Yazd</td>
         </tr>
+
         <tr>
           <td>Reza</td>
           <td>19</td>
           <td>Tabriz</td>
         </tr>
+
       </table>
     `;
   }
 
   else if(
-    ["Workbook()","load_workbook()","save()",
-     "create_sheet()","cell()"].includes(n)
+    [
+      "Workbook()",
+      "load_workbook()",
+      "save()",
+      "create_sheet()",
+      "cell()"
+    ].includes(n)
   ){
 
     html = `
       📊 <b>students.xlsx</b>
       <br>
+
       <span style="color:#7e8aa5">
         Sheet1 → 3 rows → saved
       </span>
@@ -1215,14 +1565,21 @@ function preview(t,l,args={}){
 
   else if(
     n.includes("Observer") ||
-    ["schedule()","start()","stop()",
-     "on_created()","on_deleted()",
-     "on_modified()","on_moved()"].includes(n)
+    [
+      "schedule()",
+      "start()",
+      "stop()",
+      "on_created()",
+      "on_deleted()",
+      "on_modified()",
+      "on_moved()"
+    ].includes(n)
   ){
 
     html = `
       👁 ناظر فعال است
       <br>
+
       <span style="color:#31d5c8">
         event: modified → report.xlsx
       </span>
@@ -1234,7 +1591,9 @@ function preview(t,l,args={}){
     html = `
       🗑 <b>old_file.txt</b>
       → Recycle Bin
+
       <br>
+
       <span style="color:#7e8aa5">
         فایل حذف دائمی نشده است.
       </span>
@@ -1249,9 +1608,13 @@ function preview(t,l,args={}){
       <code dir="ltr">
         fnmatch("report.xlsx", "*.xlsx")
       </code>
+
       <br>
+
       نتیجه:
-      <b style="color:#6ee7d8">True</b>
+      <b style="color:#6ee7d8">
+        True
+      </b>
     `;
   }
 
@@ -1260,7 +1623,9 @@ function preview(t,l,args={}){
     html = `
       ⏱ شبیه‌سازی تأخیر:
       <b>2 seconds</b>
+
       <br>
+
       <div class="preview-progress">
         <i style="width:35%"></i>
       </div>
@@ -1268,13 +1633,23 @@ function preview(t,l,args={}){
   }
 
   else if(
-    ["platform.system()","platform.python_version()",
-     "platform.machine()","platform.processor()"].includes(n)
+    [
+      "platform.system()",
+      "platform.python_version()",
+      "platform.machine()",
+      "platform.processor()"
+    ].includes(n)
   ){
 
     html = `
       سیستم:
-      <b>${n==="platform.system()"?"Windows":"Python / Windows"}</b>
+      <b>
+        ${
+          n==="platform.system()"
+            ? "Windows"
+            : "Python / Windows"
+        }
+      </b>
     `;
   }
 
@@ -1282,7 +1657,9 @@ function preview(t,l,args={}){
 
     html = `
       HTTP Status:
-      <b style="color:#6ee7d8">200 OK</b>
+      <b style="color:#6ee7d8">
+        200 OK
+      </b>
     `;
   }
 
@@ -1309,13 +1686,20 @@ function preview(t,l,args={}){
   }
 
   else if(
-    ["TemporaryDirectory()","TemporaryFile()",
-     "NamedTemporaryFile()","mkstemp()","mkdtemp()"].includes(n)
+    [
+      "TemporaryDirectory()",
+      "TemporaryFile()",
+      "NamedTemporaryFile()",
+      "mkstemp()",
+      "mkdtemp()"
+    ].includes(n)
   ){
 
     html = `
       📁 <b>Temporary resource</b>
+
       <br>
+
       <span style="color:#7e8aa5">
         منبع موقت برای اجرای برنامه ساخته شد.
       </span>
@@ -1323,25 +1707,39 @@ function preview(t,l,args={}){
   }
 
   else if(
-    ["connect()","cursor()","execute()",
-     "commit()","fetchall()","fetchone()"].includes(n)
+    [
+      "connect()",
+      "cursor()",
+      "execute()",
+      "commit()",
+      "fetchall()",
+      "fetchone()"
+    ].includes(n)
   ){
 
     html = `
       🗄 SQLite
       <br>
-      <b>simulation successful</b>
+      <b>
+        simulation successful
+      </b>
     `;
   }
 
   else if(
-    ["PdfReader","PdfWriter","fitz.open()",
-     "convert_from_path()"].includes(n)
+    [
+      "PdfReader",
+      "PdfWriter",
+      "fitz.open()",
+      "convert_from_path()"
+    ].includes(n)
   ){
 
     html = `
       📄 <b>PDF simulation</b>
+
       <br>
+
       <span style="color:#7e8aa5">
         فایل PDF برای نمایش ارائه شبیه‌سازی شد.
       </span>
@@ -1349,14 +1747,21 @@ function preview(t,l,args={}){
   }
 
   else if(
-    ["Document()","add_paragraph()",
-     "add_heading()","add_table()",
-     "add_page_break()","add_picture()"].includes(n)
+    [
+      "Document()",
+      "add_paragraph()",
+      "add_heading()",
+      "add_table()",
+      "add_page_break()",
+      "add_picture()"
+    ].includes(n)
   ){
 
     html = `
       📘 <b>Word document</b>
+
       <br>
+
       <span style="color:#7e8aa5">
         عملیات Word شبیه‌سازی شد.
       </span>
@@ -1364,13 +1769,19 @@ function preview(t,l,args={}){
   }
 
   else if(
-    ["Presentation()","add_slide()",
-     "add_textbox()","add_picture()"].includes(n)
+    [
+      "Presentation()",
+      "add_slide()",
+      "add_textbox()",
+      "add_picture()"
+    ].includes(n)
   ){
 
     html = `
       📊 <b>PowerPoint</b>
+
       <br>
+
       <span style="color:#7e8aa5">
         عملیات PowerPoint شبیه‌سازی شد.
       </span>
@@ -1393,7 +1804,8 @@ function preview(t,l,args={}){
   }
 
   $("resultBody").innerHTML = html;
-  $("resultStatus").textContent = "SIMULATED ✓";
+  $("resultStatus").textContent =
+    "SIMULATED ✓";
 }
 
 
@@ -1401,20 +1813,578 @@ function preview(t,l,args={}){
    VIRTUAL FILE SYSTEM HELPERS
    ========================================================= */
 
-function resetVirtualFS(){
+/*
+  همه‌ی مسیرهای VFS از ریشه PythonLab شروع می‌شوند.
 
-  VFS.root.children =
-    JSON.parse(JSON.stringify(INITIAL_FILES));
+  مثال:
 
-  selectedPath = null;
-  liveLog = [];
+  ""
+  .
+  report.docx
+  Projects
+  Projects/Python
+  Projects/Python/test.py
+*/
 
-  renderFileExplorer();
-  renderLiveLog(
-    "محیط نمایشی به حالت اولیه برگشت."
+function normalizeVirtualPath(path){
+
+  let p =
+    String(path ?? "")
+      .trim()
+      .replace(/\\/g,"/");
+
+  if(
+    p === "" ||
+    p === "."
+  )
+    return "";
+
+  p =
+    p.replace(/^\.\/+/,"")
+     .replace(/\/+/g,"/");
+
+  const parts = [];
+
+  for(const part of p.split("/")){
+
+    if(!part || part === ".")
+      continue;
+
+    if(part === ".."){
+
+      if(parts.length)
+        parts.pop();
+
+      continue;
+    }
+
+    parts.push(part);
+  }
+
+  return parts.join("/");
+}
+
+
+function splitVirtualPath(path){
+
+  const normalized =
+    normalizeVirtualPath(path);
+
+  if(!normalized)
+    return [];
+
+  return normalized.split("/");
+}
+
+
+function getNode(path){
+
+  const normalized =
+    normalizeVirtualPath(path);
+
+  if(!normalized)
+    return VFS.root;
+
+  const parts =
+    splitVirtualPath(normalized);
+
+  let current =
+    VFS.root;
+
+  for(const part of parts){
+
+    if(
+      !current ||
+      current.type !== "folder"
+    )
+      return null;
+
+    current =
+      current.children.find(
+        x => x.name === part
+      );
+
+    if(!current)
+      return null;
+  }
+
+  return current;
+}
+
+
+function getParentNode(path){
+
+  const normalized =
+    normalizeVirtualPath(path);
+
+  const parts =
+    splitVirtualPath(normalized);
+
+  if(parts.length <= 1)
+    return VFS.root;
+
+  const parentPath =
+    parts
+      .slice(0,-1)
+      .join("/");
+
+  return getNode(parentPath);
+}
+
+
+function getNodeName(path){
+
+  const parts =
+    splitVirtualPath(path);
+
+  return parts.length
+    ? parts[parts.length-1]
+    : VFS.root.name;
+}
+
+
+function getNodePath(path){
+
+  return normalizeVirtualPath(path);
+}
+
+
+function findChild(name){
+
+  return getNode(name);
+}
+
+
+function removeNode(path){
+
+  const normalized =
+    normalizeVirtualPath(path);
+
+  if(!normalized)
+    return false;
+
+  const parent =
+    getParentNode(normalized);
+
+  if(!parent || !parent.children)
+    return false;
+
+  const name =
+    getNodeName(normalized);
+
+  const index =
+    parent.children.findIndex(
+      x => x.name === name
+    );
+
+  if(index < 0)
+    return false;
+
+  parent.children.splice(
+    index,
+    1
   );
 
-  toast("محیط فایل‌ها ریست شد.");
+  return true;
+}
+
+
+function insertNode(path,node){
+
+  const normalized =
+    normalizeVirtualPath(path);
+
+  const parts =
+    splitVirtualPath(normalized);
+
+  if(!parts.length)
+    return false;
+
+  const name =
+    parts.pop();
+
+  const parentPath =
+    parts.join("/");
+
+  const parent =
+    getNode(parentPath);
+
+  if(
+    !parent ||
+    parent.type !== "folder"
+  )
+    return false;
+
+  node.name = name;
+
+  parent.children.push(node);
+
+  return true;
+}
+
+
+function createFolderPath(path){
+
+  const normalized =
+    normalizeVirtualPath(path);
+
+  if(!normalized)
+    return VFS.root;
+
+  const parts =
+    splitVirtualPath(normalized);
+
+  let current =
+    VFS.root;
+
+  for(const part of parts){
+
+    let folder =
+      current.children.find(
+        x =>
+          x.type === "folder" &&
+          x.name === part
+      );
+
+    if(!folder){
+
+      folder = {
+        type:"folder",
+        name:part,
+        children:[]
+      };
+
+      current.children.push(folder);
+    }
+
+    current = folder;
+  }
+
+  return current;
+}
+
+
+function createVirtualFile(name){
+
+  const lower =
+    name.toLowerCase();
+
+  let kind =
+    "text";
+
+  if(/\.(jpg|jpeg|png|gif|bmp)$/.test(lower))
+    kind = "image";
+
+  else if(/\.(mp4|avi|mkv|mov)$/.test(lower))
+    kind = "video";
+
+  else if(lower.endsWith(".docx"))
+    kind = "word";
+
+  else if(lower.endsWith(".pptx"))
+    kind = "powerpoint";
+
+  else if(lower.endsWith(".xlsx"))
+    kind = "excel";
+
+  else if(lower.endsWith(".csv"))
+    kind = "csv";
+
+  return {
+    type:"file",
+    name,
+    size:"1 KB",
+    kind,
+    content:""
+  };
+}
+
+
+function cloneNode(node){
+
+  return JSON.parse(
+    JSON.stringify(node)
+  );
+}
+
+
+function buildDestinationPath(src,dst){
+
+  const normalizedDst =
+    normalizeVirtualPath(dst);
+
+  if(!normalizedDst)
+    return null;
+
+  const destinationNode =
+    getNode(normalizedDst);
+
+  /*
+    اگر مقصد یک پوشه موجود باشد،
+    رفتار شبیه shutil است:
+    فایل داخل آن پوشه قرار می‌گیرد.
+  */
+
+  if(
+    destinationNode &&
+    destinationNode.type === "folder"
+  ){
+
+    return (
+      normalizedDst +
+      "/" +
+      getNodeName(src)
+    );
+  }
+
+  return normalizedDst;
+}
+
+
+/* =========================================================
+   FILE EXPLORER
+   ========================================================= */
+
+function renderFileExplorer(){
+
+  const el =
+    document.getElementById("liveExplorer");
+
+  if(!el)
+    return;
+
+  const current =
+    getNode(currentExplorerPath);
+
+  /*
+    اگر پوشه‌ای که در آن بودیم حذف شده باشد،
+    به ریشه برمی‌گردیم.
+  */
+
+  if(
+    !current ||
+    current.type !== "folder"
+  ){
+
+    currentExplorerPath = "";
+
+    return renderFileExplorer();
+  }
+
+  const a =
+    current.children || [];
+
+  const currentDisplay =
+    currentExplorerPath
+      ? `PythonLab / ${currentExplorerPath}`
+      : "PythonLab /";
+
+  el.innerHTML = `
+
+    <div class="explorer-head">
+
+      <div>
+
+        <span class="eyebrow">
+          VIRTUAL FILE EXPLORER
+        </span>
+
+        <b>
+          ${escapeHtml(currentDisplay)}
+        </b>
+
+      </div>
+
+      <button
+        class="reset-files"
+        type="button"
+        id="resetFiles">
+        ↻ بازنشانی
+      </button>
+
+    </div>
+
+
+    <div class="explorer-toolbar">
+
+      ${
+        currentExplorerPath
+          ? `
+            <button
+              type="button"
+              class="file-back"
+              id="fileBack">
+              ← پوشه والد
+            </button>
+          `
+          : ""
+      }
+
+      <span>
+        📁
+        ${a.filter(x => x.type==="folder").length}
+        پوشه
+      </span>
+
+      <span>•</span>
+
+      <span>
+        📄
+        ${a.filter(x => x.type==="file").length}
+        فایل
+      </span>
+
+    </div>
+
+
+    <div class="file-grid">
+
+      ${
+        a.map(x => {
+
+          const itemPath =
+            currentExplorerPath
+              ? currentExplorerPath + "/" + x.name
+              : x.name;
+
+          return `
+            <button
+              type="button"
+              class="file-item ${
+                selectedPath === itemPath
+                  ? "selected"
+                  : ""
+              }"
+              data-file="${escapeHtml(itemPath)}"
+              data-type="${x.type}">
+
+              <span class="big-file-icon">
+                ${iconFor(x)}
+              </span>
+
+              <span class="file-name">
+                ${escapeHtml(x.name)}
+              </span>
+
+              <span class="file-meta">
+
+                ${
+                  x.type === "folder"
+                    ? (x.children?.length || 0) + " مورد"
+                    : x.size
+                }
+
+              </span>
+
+            </button>
+          `;
+        }).join("")
+      }
+
+      ${
+        a.length === 0
+          ? `
+            <div class="empty-files">
+              این پوشه خالی است.
+            </div>
+          `
+          : ""
+      }
+
+    </div>
+  `;
+
+
+  document
+    .querySelectorAll(".file-item")
+    .forEach(b => {
+
+      b.onclick = () => {
+
+        const path =
+          b.dataset.file;
+
+        const node =
+          getNode(path);
+
+        /*
+          کلیک روی پوشه:
+          وارد پوشه می‌شویم.
+        */
+
+        if(
+          node &&
+          node.type === "folder"
+        ){
+
+          currentExplorerPath =
+            normalizeVirtualPath(path);
+
+          selectedPath =
+            currentExplorerPath;
+
+          renderFileExplorer();
+
+          renderLiveLog(
+            `ورود به پوشه: ${path}`
+          );
+
+          return;
+        }
+
+        /*
+          کلیک روی فایل:
+          فایل انتخاب می‌شود.
+        */
+
+        selectedPath = path;
+
+        renderFileExplorer();
+
+        renderLiveLog(
+          `انتخاب شد: ${path}`
+        );
+      };
+    });
+
+
+  const reset =
+    document.getElementById("resetFiles");
+
+  if(reset)
+    reset.onclick =
+      resetVirtualFS;
+
+
+  const back =
+    document.getElementById("fileBack");
+
+  if(back){
+
+    back.onclick = () => {
+
+      const parts =
+        splitVirtualPath(
+          currentExplorerPath
+        );
+
+      parts.pop();
+
+      currentExplorerPath =
+        parts.join("/");
+
+      selectedPath =
+        currentExplorerPath || null;
+
+      renderFileExplorer();
+
+      renderLiveLog(
+        currentExplorerPath
+          ? `ورود به پوشه: ${currentExplorerPath}`
+          : "بازگشت به ریشه"
+      );
+    };
+  }
 }
 
 
@@ -1445,149 +2415,6 @@ function iconFor(x){
 }
 
 
-function findChild(name){
-
-  if(!name) return null;
-
-  return VFS.root.children.find(
-    x => x.name === name
-  );
-}
-
-
-function createVirtualFile(name){
-
-  const lower = name.toLowerCase();
-
-  let kind = "text";
-
-  if(/\.(jpg|jpeg|png|gif|bmp)$/.test(lower))
-    kind = "image";
-
-  else if(/\.(mp4|avi|mkv|mov)$/.test(lower))
-    kind = "video";
-
-  else if(lower.endsWith(".docx"))
-    kind = "word";
-
-  else if(lower.endsWith(".pptx"))
-    kind = "powerpoint";
-
-  else if(lower.endsWith(".xlsx"))
-    kind = "excel";
-
-  else if(lower.endsWith(".csv"))
-    kind = "csv";
-
-  return {
-    type:"file",
-    name,
-    size:"1 KB",
-    kind
-  };
-}
-
-
-/* =========================================================
-   FILE EXPLORER
-   ========================================================= */
-
-function renderFileExplorer(){
-
-  const el = document.getElementById("liveExplorer");
-
-  if(!el) return;
-
-  const a = VFS.root.children;
-
-  el.innerHTML = `
-    <div class="explorer-head">
-      <div>
-        <span class="eyebrow">
-          VIRTUAL FILE EXPLORER
-        </span>
-        <b>PythonLab /</b>
-      </div>
-
-      <button
-        class="reset-files"
-        type="button"
-        id="resetFiles">
-        ↻ بازنشانی
-      </button>
-    </div>
-
-    <div class="explorer-toolbar">
-      <span>
-        📁 ${a.filter(x => x.type==="folder").length}
-        پوشه
-      </span>
-
-      <span>•</span>
-
-      <span>
-        📄 ${a.filter(x => x.type==="file").length}
-        فایل
-      </span>
-    </div>
-
-    <div class="file-grid">
-
-      ${a.map(x =>
-        `<button
-          type="button"
-          class="file-item ${selectedPath===x.name?"selected":""}"
-          data-file="${escapeHtml(x.name)}">
-
-          <span class="big-file-icon">
-            ${iconFor(x)}
-          </span>
-
-          <span class="file-name">
-            ${escapeHtml(x.name)}
-          </span>
-
-          <span class="file-meta">
-            ${
-              x.type==="folder"
-                ? (x.children?.length||0)+" مورد"
-                : x.size
-            }
-          </span>
-
-        </button>`
-      ).join("")}
-
-      ${
-        a.length===0
-          ? '<div class="empty-files">پوشه خالی است.</div>'
-          : ""
-      }
-
-    </div>
-  `;
-
-  document.querySelectorAll(".file-item").forEach(b => {
-
-    b.onclick = () => {
-
-      selectedPath = b.dataset.file;
-
-      renderFileExplorer();
-
-      renderLiveLog(
-        `انتخاب شد: ${b.dataset.file}`
-      );
-    };
-  });
-
-  const reset = document.getElementById("resetFiles");
-
-  if(reset)
-    reset.onclick = resetVirtualFS;
-}
-
-
 /* =========================================================
    LIVE LOG
    ========================================================= */
@@ -1597,34 +2424,74 @@ function renderLiveLog(msg){
   if(msg){
 
     liveLog.unshift({
-      time:new Date().toLocaleTimeString(
-        "fa-IR",
-        {
-          hour:"2-digit",
-          minute:"2-digit",
-          second:"2-digit"
-        }
-      ),
+
+      time:
+        new Date().toLocaleTimeString(
+          "fa-IR",
+          {
+            hour:"2-digit",
+            minute:"2-digit",
+            second:"2-digit"
+          }
+        ),
+
       msg
     });
   }
 
-  const e = document.getElementById("liveLog");
+  const e =
+    document.getElementById("liveLog");
 
-  if(!e) return;
+  if(!e)
+    return;
 
   e.innerHTML =
     liveLog
       .slice(0,7)
       .map(x =>
         `<div class="log-line">
-          <span>${x.time}</span>
-          <b>${escapeHtml(x.msg)}</b>
+
+          <span>
+            ${x.time}
+          </span>
+
+          <b>
+            ${escapeHtml(x.msg)}
+          </b>
+
         </div>`
       ).join("") ||
+
       `<div class="empty-log">
         هنوز دستوری اجرا نشده است.
       </div>`;
+}
+
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+function resetVirtualFS(){
+
+  VFS.root.children =
+    JSON.parse(
+      JSON.stringify(INITIAL_FILES)
+    );
+
+  selectedPath = null;
+  currentExplorerPath = "";
+  liveLog = [];
+
+  renderFileExplorer();
+
+  renderLiveLog(
+    "محیط نمایشی به حالت اولیه برگشت."
+  );
+
+  toast(
+    "محیط فایل‌ها ریست شد."
+  );
 }
 
 
@@ -1637,12 +2504,17 @@ function statePreview(t,l,args={}){
   const n = t[0];
 
   const val = (k,f="") =>
-    Object.prototype.hasOwnProperty.call(args,k)
+    Object.prototype.hasOwnProperty.call(
+      args,
+      k
+    )
       ? String(args[k])
       : f;
 
 
-  /* ---------- OS ---------- */
+  /* =====================================================
+     OS
+     ===================================================== */
 
   if(n === "getcwd()"){
 
@@ -1650,16 +2522,21 @@ function statePreview(t,l,args={}){
       <div class="live-success">
         📁 PythonLab
       </div>
+
       <p>
         مسیر فعلی شبیه‌سازی:
-        <code dir="ltr">PythonLab</code>
+        <code dir="ltr">
+          PythonLab
+        </code>
       </p>
     `;
 
     $("resultStatus").textContent =
       "READ STATE ✓";
 
-    renderLiveLog("os.getcwd()");
+    renderLiveLog(
+      "os.getcwd()"
+    );
 
     return true;
   }
@@ -1667,15 +2544,54 @@ function statePreview(t,l,args={}){
 
   if(n === "listdir()"){
 
-    const path = val("path",".");
+    const path =
+      val(
+        "path",
+        currentExplorerPath || "."
+      );
+
+    const node =
+      getNode(path);
+
+    if(
+      !node ||
+      node.type !== "folder"
+    ){
+
+      $("resultBody").innerHTML = `
+        <div class="live-error">
+          ✕ مسیر «${escapeHtml(path)}»
+          یک پوشه معتبر نیست.
+        </div>
+      `;
+
+      $("resultStatus").textContent =
+        "ERROR ✕";
+
+      return true;
+    }
+
+    const children =
+      node.children || [];
 
     $("resultBody").innerHTML = `
       <div class="state-list">
+
         ${
-          VFS.root.children.map(x =>
-            `<span>${escapeHtml(x.name)}</span>`
-          ).join("")
+          children.length
+            ? children.map(x =>
+                `<span>
+                  ${
+                    x.type==="folder"
+                      ? "📁 "
+                      : "📄 "
+                  }
+                  ${escapeHtml(x.name)}
+                </span>`
+              ).join("")
+            : "<span>پوشه خالی است.</span>"
         }
+
       </div>
 
       <p>
@@ -1702,44 +2618,62 @@ function statePreview(t,l,args={}){
     n === "makedirs()"
   ){
 
-    const name = val("path");
+    const name =
+      val("path");
 
     if(!name){
 
-      toast("برای ساخت پوشه، path وارد کن.");
+      toast(
+        "برای ساخت پوشه، path وارد کن."
+      );
+
       return true;
     }
 
-    const parts =
-      name
-        .split(/[\\/]+/)
-        .map(x => x.trim())
-        .filter(Boolean);
+    const existing =
+      getNode(name);
 
-    let current = VFS.root;
+    if(existing){
 
-    for(const part of parts){
+      toast(
+        `«${name}» از قبل وجود دارد.`
+      );
 
-      let folder =
-        current.children.find(
-          x =>
-            x.type === "folder" &&
-            x.name === part
-        );
+      $("resultBody").innerHTML = `
+        <div class="live-error">
+          ⚠ مسیر «${escapeHtml(name)}»
+          از قبل وجود دارد.
+        </div>
+      `;
 
-      if(!folder){
+      $("resultStatus").textContent =
+        "ALREADY EXISTS";
 
-        folder = {
-          type:"folder",
-          name:part,
-          children:[]
-        };
-
-        current.children.push(folder);
-      }
-
-      current = folder;
+      return true;
     }
+
+    /*
+      mkdir و makedirs در این شبیه‌ساز
+      ساختار مسیر را به‌صورت قابل مشاهده ایجاد می‌کنند.
+    */
+
+    const folder =
+      createFolderPath(name);
+
+    if(!folder){
+
+      toast(
+        "ساخت پوشه انجام نشد."
+      );
+
+      return true;
+    }
+
+    currentExplorerPath =
+      normalizeVirtualPath(name);
+
+    selectedPath =
+      currentExplorerPath;
 
     renderFileExplorer();
 
@@ -1749,7 +2683,8 @@ function statePreview(t,l,args={}){
 
     $("resultBody").innerHTML = `
       <div class="live-success">
-        📁 ساختار «${escapeHtml(name)}» ساخته شد
+        📁 ساختار «${escapeHtml(name)}»
+        ساخته شد.
       </div>
 
       <p>
@@ -1760,6 +2695,10 @@ function statePreview(t,l,args={}){
               : `os.makedirs(${JSON.stringify(name)})`
           }
         </code>
+      </p>
+
+      <p>
+        اکنون File Explorer داخل همین پوشه را نمایش می‌دهد.
       </p>
     `;
 
@@ -1776,25 +2715,31 @@ function statePreview(t,l,args={}){
   ){
 
     const target =
-      val("path",selectedPath || "");
-
-    const i =
-      VFS.root.children.findIndex(
-        x => x.name === target
+      val(
+        "path",
+        selectedPath || ""
       );
 
-    if(i < 0){
+    const node =
+      getNode(target);
+
+    if(
+      !node ||
+      node.type !== "file"
+    ){
 
       toast(
-        `فایل یا پوشه «${target}» پیدا نشد.`
+        `فایل «${target}» پیدا نشد.`
       );
 
       return true;
     }
 
-    VFS.root.children.splice(i,1);
+    removeNode(target);
 
-    if(selectedPath === target)
+    if(
+      selectedPath === target
+    )
       selectedPath = null;
 
     renderFileExplorer();
@@ -1805,22 +2750,19 @@ function statePreview(t,l,args={}){
 
     $("resultBody").innerHTML = `
       <div class="live-success">
-        ✓ «${escapeHtml(target)}» حذف شد
+        ✓ «${escapeHtml(target)}»
+        حذف شد
       </div>
 
       <p>
         <code dir="ltr">
-          ${n==="remove()"
-            ? `os.remove(${JSON.stringify(target)})`
-            : `Path(${JSON.stringify(target)}).unlink()`
+          ${
+            n==="remove()"
+              ? `os.remove(${JSON.stringify(target)})`
+              : `Path(${JSON.stringify(target)}).unlink()`
           }
         </code>
       </p>
-
-      <div class="state-count">
-        اکنون ${VFS.root.children.length}
-        آیتم باقی مانده است.
-      </div>
     `;
 
     $("resultStatus").textContent =
@@ -1836,12 +2778,16 @@ function statePreview(t,l,args={}){
   ){
 
     const target =
-      val("src",selectedPath || "");
+      val(
+        "src",
+        selectedPath || ""
+      );
 
     const dest =
       val("dst","");
 
-    const x = findChild(target);
+    const x =
+      getNode(target);
 
     if(!x){
 
@@ -1854,32 +2800,70 @@ function statePreview(t,l,args={}){
 
     if(!dest){
 
-      toast("مقصد را وارد کن.");
+      toast(
+        "مقصد را وارد کن."
+      );
+
       return true;
     }
 
-    x.name = dest;
+    const destination =
+      normalizeVirtualPath(dest);
 
-    selectedPath = dest;
+    const existing =
+      getNode(destination);
+
+    if(existing){
+
+      if(n === "replace()"){
+        removeNode(destination);
+      }else{
+
+        toast(
+          "مقصد از قبل وجود دارد."
+        );
+
+        return true;
+      }
+    }
+
+    const copy =
+      cloneNode(x);
+
+    removeNode(target);
+
+    if(!insertNode(destination,copy)){
+
+      toast(
+        "مسیر مقصد معتبر نیست."
+      );
+
+      return true;
+    }
+
+    selectedPath =
+      destination;
 
     renderFileExplorer();
 
     renderLiveLog(
-      `${target} → ${dest}`
+      `${target} → ${destination}`
     );
 
     $("resultBody").innerHTML = `
       <div class="live-success">
         ✓ «${escapeHtml(target)}»
-        به «${escapeHtml(dest)}» تغییر کرد
+        به
+        «${escapeHtml(destination)}»
+        تغییر کرد
       </div>
 
       <p>
         <code dir="ltr">
           ${
             n==="rename()"
-              ? `os.rename(${JSON.stringify(target)}, ${JSON.stringify(dest)})`
-              : `os.replace(${JSON.stringify(target)}, ${JSON.stringify(dest)})`
+              ? `os.rename(${JSON.stringify(target)}, ${JSON.stringify(destination)})`
+              : `os.replace(${JSON.stringify(target)}, ${JSON.stringify(destination)})`
           }
         </code>
       </p>
@@ -1897,9 +2881,13 @@ function statePreview(t,l,args={}){
   ){
 
     const target =
-      val("path",selectedPath || "");
+      val(
+        "path",
+        selectedPath || ""
+      );
 
-    const x = findChild(target);
+    const x =
+      getNode(target);
 
     const result =
       n === "isfile()"
@@ -1926,28 +2914,72 @@ function statePreview(t,l,args={}){
 
 
   if(
-    ["abspath()","basename()","dirname()","join()"].includes(n)
+    [
+      "abspath()",
+      "basename()",
+      "dirname()",
+      "join()"
+    ].includes(n)
   ){
 
     const target =
-      val("path",selectedPath || "");
+      val(
+        "path",
+        selectedPath || ""
+      );
 
     let result = "";
 
-    if(n === "abspath()")
-      result = `C:/PythonLab/${target}`;
+    if(n === "abspath()"){
 
-    else if(n === "basename()")
-      result = target.split(/[\\/]/).pop();
+      result =
+        `C:/PythonLab/${
+          normalizeVirtualPath(target)
+        }`;
+    }
 
-    else if(n === "dirname()")
-      result = target.split(/[\\/]/).slice(0,-1).join("/") || ".";
+    else if(n === "basename()"){
 
-    else
-      result = "PythonLab/" + target;
+      result =
+        target
+          .split(/[\\/]/)
+          .filter(Boolean)
+          .pop() || "";
+    }
+
+    else if(n === "dirname()"){
+
+      const parts =
+        normalizeVirtualPath(target)
+          .split("/")
+          .filter(Boolean);
+
+      parts.pop();
+
+      result =
+        parts.length
+          ? parts.join("/")
+          : ".";
+    }
+
+    else {
+
+      const a =
+        val("a","");
+
+      const b =
+        val("b","");
+
+      result =
+        normalizeVirtualPath(
+          `${a}/${b}`
+        );
+    }
 
     $("resultBody").innerHTML = `
-      <code dir="ltr">${escapeHtml(result)}</code>
+      <code dir="ltr">
+        ${escapeHtml(result)}
+      </code>
     `;
 
     $("resultStatus").textContent =
@@ -1960,15 +2992,19 @@ function statePreview(t,l,args={}){
   if(n === "getsize()"){
 
     const target =
-      val("path",selectedPath || "");
+      val(
+        "path",
+        selectedPath || ""
+      );
 
-    const x = findChild(target);
+    const x =
+      getNode(target);
 
     $("resultBody").innerHTML = `
       <b>
         ${
-          x
-            ? x.size
+          x && x.type==="file"
+            ? escapeHtml(x.size || "1 KB")
             : "File not found"
         }
       </b>
@@ -1981,16 +3017,90 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- PATHLIB ---------- */
+  /* =====================================================
+     PATHLIB
+     ===================================================== */
+
+  if(n === "Path()"){
+
+    const target =
+      val(
+        "path",
+        selectedPath || "."
+      );
+
+    const normalized =
+      normalizeVirtualPath(target);
+
+    const node =
+      getNode(normalized);
+
+    $("resultBody").innerHTML = `
+      <div class="live-success">
+        ◈ Path object ساخته شد
+      </div>
+
+      <p>
+        <code dir="ltr">
+          Path(${JSON.stringify(target)})
+        </code>
+      </p>
+
+      <div class="state-list">
+
+        <span>
+          نوع:
+          ${
+            node
+              ? node.type === "folder"
+                ? "پوشه"
+                : "فایل"
+              : "مسیر ناموجود"
+          }
+        </span>
+
+        <span>
+          وجود دارد:
+          <b>
+            ${!!node}
+          </b>
+        </span>
+
+        <span>
+          نام:
+          ${escapeHtml(getNodeName(target))}
+        </span>
+
+      </div>
+    `;
+
+    $("resultStatus").textContent =
+      "PATH CREATED ✓";
+
+    renderLiveLog(
+      `Path("${target}")`
+    );
+
+    return true;
+  }
+
 
   if(
-    ["exists()","is_file()","is_dir()"].includes(n)
+    [
+      "exists()",
+      "is_file()",
+      "is_dir()"
+    ].includes(n)
   ){
 
     const target =
-      val("path",selectedPath || "");
+      val(
+        "path",
+        selectedPath || ""
+      );
 
-    const x = findChild(target);
+    const x =
+      getNode(target);
 
     let result = false;
 
@@ -1998,10 +3108,14 @@ function statePreview(t,l,args={}){
       result = !!x;
 
     if(n === "is_file()")
-      result = !!x && x.type === "file";
+      result =
+        !!x &&
+        x.type === "file";
 
     if(n === "is_dir()")
-      result = !!x && x.type === "folder";
+      result =
+        !!x &&
+        x.type === "folder";
 
     $("resultBody").innerHTML = `
       <code dir="ltr">
@@ -2010,13 +3124,25 @@ function statePreview(t,l,args={}){
 
       <br>
 
-      <b class="live-true">
+      <b class="${result?"live-true":""}">
         ${result}
       </b>
+
+      <p>
+        ${
+          result
+            ? "مسیر در Virtual File System وجود دارد."
+            : "چنین مسیر یا فایلی در محیط نمایشی وجود ندارد."
+        }
+      </p>
     `;
 
     $("resultStatus").textContent =
       "READ STATE ✓";
+
+    renderLiveLog(
+      `Path("${target}").${n}`
+    );
 
     return true;
   }
@@ -2024,33 +3150,100 @@ function statePreview(t,l,args={}){
 
   if(n === "glob()"){
 
+    const basePath =
+      val(
+        "path",
+        currentExplorerPath || "."
+      );
+
     const pattern =
-      val("pattern","*.txt");
+      val(
+        "pattern",
+        "*.txt"
+      );
+
+    const base =
+      getNode(basePath);
+
+    if(
+      !base ||
+      base.type !== "folder"
+    ){
+
+      $("resultBody").innerHTML = `
+        <div class="live-error">
+          ✕ مسیر
+          «${escapeHtml(basePath)}»
+          یک پوشه نیست.
+        </div>
+      `;
+
+      $("resultStatus").textContent =
+        "ERROR ✕";
+
+      return true;
+    }
 
     const matches =
-      VFS.root.children
+      (base.children || [])
         .filter(x =>
           simplePatternMatch(
             x.name,
             pattern
           )
         )
-        .map(x => x.name);
+        .map(x => {
+
+          const cleanBase =
+            normalizeVirtualPath(
+              basePath
+            );
+
+          return cleanBase
+            ? `${cleanBase}/${x.name}`
+            : x.name;
+        });
 
     $("resultBody").innerHTML = `
+      <div class="live-success">
+        🔎 جست‌وجوی الگو انجام شد
+      </div>
+
+      <p>
+        مسیر:
+        <code dir="ltr">
+          ${escapeHtml(basePath || ".")}
+        </code>
+
+        <br>
+
+        الگو:
+        <code dir="ltr">
+          ${escapeHtml(pattern)}
+        </code>
+      </p>
+
       <div class="state-list">
+
         ${
           matches.length
             ? matches.map(x =>
-                `<span>${escapeHtml(x)}</span>`
+                `<span>
+                  📄 ${escapeHtml(x)}
+                </span>`
               ).join("")
             : "<span>موردی پیدا نشد.</span>"
         }
+
       </div>
     `;
 
     $("resultStatus").textContent =
       "SEARCHED ✓";
+
+    renderLiveLog(
+      `Path("${basePath}").glob("${pattern}")`
+    );
 
     return true;
   }
@@ -2058,20 +3251,321 @@ function statePreview(t,l,args={}){
 
   if(n === "iterdir()"){
 
+    const target =
+      val(
+        "path",
+        currentExplorerPath || "."
+      );
+
+    const folder =
+      getNode(target);
+
+    if(
+      !folder ||
+      folder.type !== "folder"
+    ){
+
+      $("resultBody").innerHTML = `
+        <div class="live-error">
+          ✕ این مسیر پوشه نیست.
+        </div>
+      `;
+
+      $("resultStatus").textContent =
+        "ERROR ✕";
+
+      return true;
+    }
+
+    const children =
+      folder.children || [];
+
     $("resultBody").innerHTML = `
       <div class="state-list">
+
         ${
-          VFS.root.children
-            .map(x =>
-              `<span>${escapeHtml(x.name)}</span>`
-            )
-            .join("")
+          children.length
+            ? children.map(x =>
+                `<span>
+                  ${
+                    x.type==="folder"
+                      ? "📁 "
+                      : "📄 "
+                  }
+                  ${escapeHtml(x.name)}
+                </span>`
+              ).join("")
+            : "<span>پوشه خالی است.</span>"
         }
+
       </div>
     `;
 
     $("resultStatus").textContent =
       "READ STATE ✓";
+
+    return true;
+  }
+
+
+  if(n === "read_text()"){
+
+    const target =
+      val(
+        "path",
+        selectedPath || ""
+      );
+
+    const node =
+      getNode(target);
+
+    if(
+      !node ||
+      node.type !== "file"
+    ){
+
+      $("resultBody").innerHTML = `
+        <div class="live-error">
+          ✕ فایل پیدا نشد.
+        </div>
+      `;
+
+      $("resultStatus").textContent =
+        "ERROR ✕";
+
+      return true;
+    }
+
+    const content =
+      node.content ??
+      "Hello Python!";
+
+    $("resultBody").innerHTML = `
+      <div class="live-success">
+        📄 محتوای فایل:
+      </div>
+
+      <pre
+        dir="ltr"
+        style="white-space:pre-wrap"
+      >${escapeHtml(content)}</pre>
+    `;
+
+    $("resultStatus").textContent =
+      "FILE READ ✓";
+
+    return true;
+  }
+
+
+  if(n === "write_text()"){
+
+    const target =
+      val(
+        "path",
+        selectedPath || ""
+      );
+
+    const text =
+      val(
+        "text",
+        "Hello Python"
+      );
+
+    let node =
+      getNode(target);
+
+    if(!node){
+
+      const normalized =
+        normalizeVirtualPath(target);
+
+      const parts =
+        splitVirtualPath(normalized);
+
+      if(!parts.length){
+
+        toast(
+          "نام فایل را وارد کن."
+        );
+
+        return true;
+      }
+
+      const filename =
+        parts.pop();
+
+      const parentPath =
+        parts.join("/");
+
+      const parent =
+        getNode(parentPath);
+
+      if(
+        !parent ||
+        parent.type !== "folder"
+      ){
+
+        toast(
+          "پوشه مقصد وجود ندارد."
+        );
+
+        return true;
+      }
+
+      node =
+        createVirtualFile(filename);
+
+      node.content = text;
+
+      parent.children.push(node);
+
+    }else{
+
+      if(node.type !== "file"){
+
+        toast(
+          "مسیر انتخاب‌شده فایل نیست."
+        );
+
+        return true;
+      }
+
+      node.content = text;
+    }
+
+    node.size =
+      `${Math.max(1,text.length)} B`;
+
+    selectedPath =
+      normalizeVirtualPath(target);
+
+    renderFileExplorer();
+
+    renderLiveLog(
+      `Path("${target}").write_text(...)`
+    );
+
+    $("resultBody").innerHTML = `
+      <div class="live-success">
+        ✓ متن در فایل نوشته شد.
+      </div>
+
+      <p>
+        تعداد کاراکترها:
+        <b>${text.length}</b>
+      </p>
+    `;
+
+    $("resultStatus").textContent =
+      "FILE WRITTEN ✓";
+
+    return true;
+  }
+
+
+  if(n === "mkdir()"){
+
+    const target =
+      val(
+        "path",
+        selectedPath || ""
+      );
+
+    const folder =
+      createFolderPath(target);
+
+    if(!folder){
+
+      toast(
+        "ساخت پوشه انجام نشد."
+      );
+
+      return true;
+    }
+
+    currentExplorerPath =
+      normalizeVirtualPath(target);
+
+    renderFileExplorer();
+
+    $("resultBody").innerHTML = `
+      <div class="live-success">
+        📁 پوشه ساخته شد.
+      </div>
+    `;
+
+    $("resultStatus").textContent =
+      "FOLDER CREATED ✓";
+
+    return true;
+  }
+
+
+  if(n === "rename()"){
+
+    const source =
+      val(
+        "path",
+        selectedPath || ""
+      );
+
+    const target =
+      val(
+        "target",
+        "new_name"
+      );
+
+    const node =
+      getNode(source);
+
+    if(!node){
+
+      toast(
+        "مسیر پیدا نشد."
+      );
+
+      return true;
+    }
+
+    const parent =
+      getParentNode(source);
+
+    if(!parent){
+
+      toast(
+        "پوشه والد پیدا نشد."
+      );
+
+      return true;
+    }
+
+    const oldName =
+      node.name;
+
+    node.name =
+      normalizeVirtualPath(target)
+        .split("/")
+        .pop();
+
+    selectedPath =
+      currentExplorerPath
+        ? `${currentExplorerPath}/${node.name}`
+        : node.name;
+
+    renderFileExplorer();
+
+    $("resultBody").innerHTML = `
+      <div class="live-success">
+        ✓ «${escapeHtml(oldName)}»
+        به
+        «${escapeHtml(node.name)}»
+        تغییر کرد.
+      </div>
+    `;
+
+    $("resultStatus").textContent =
+      "RENAMED ✓";
 
     return true;
   }
@@ -2082,15 +3576,43 @@ function statePreview(t,l,args={}){
   ){
 
     const target =
-      val("path",selectedPath || "");
+      val(
+        "path",
+        selectedPath || ""
+      );
 
-    const result =
-      n === "suffix"
-        ? "." + (target.split(".").pop() || "")
-        : target.split(/[\\/]/).pop();
+    let result = "";
+
+    if(n === "suffix"){
+
+      const filename =
+        target
+          .split(/[\\/]/)
+          .filter(Boolean)
+          .pop() || "";
+
+      const index =
+        filename.lastIndexOf(".");
+
+      result =
+        index > 0
+          ? filename.slice(index)
+          : "";
+    }
+
+    else {
+
+      result =
+        target
+          .split(/[\\/]/)
+          .filter(Boolean)
+          .pop() || "";
+    }
 
     $("resultBody").innerHTML = `
-      <code dir="ltr">${escapeHtml(result)}</code>
+      <code dir="ltr">
+        ${escapeHtml(result)}
+      </code>
     `;
 
     $("resultStatus").textContent =
@@ -2100,21 +3622,31 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- SHUTIL ---------- */
+  /* =====================================================
+     SHUTIL
+     ===================================================== */
 
   if(
-    ["copy()","copy2()","move()"].includes(n)
+    [
+      "copy()",
+      "copy2()",
+      "move()"
+    ].includes(n)
   ){
 
     const src =
-      val("src",selectedPath || "");
+      val(
+        "src",
+        selectedPath || ""
+      );
 
     const dst =
       val("dst","");
 
-    const x = findChild(src);
+    const sourceNode =
+      getNode(src);
 
-    if(!x){
+    if(!sourceNode){
 
       toast(
         `«${src}» پیدا نشد.`
@@ -2125,51 +3657,100 @@ function statePreview(t,l,args={}){
 
     if(!dst){
 
-      toast("مقصد را وارد کن.");
+      toast(
+        "مقصد را وارد کن."
+      );
+
       return true;
     }
 
-    const newName =
-      dst.split(/[\\/]/).pop();
+    const destination =
+      buildDestinationPath(
+        src,
+        dst
+      );
+
+    if(!destination){
+
+      toast(
+        "مقصد معتبر نیست."
+      );
+
+      return true;
+    }
+
+    const existing =
+      getNode(destination);
+
+    if(existing){
+
+      toast(
+        "فایل یا پوشه مقصد از قبل وجود دارد."
+      );
+
+      return true;
+    }
 
     if(n === "move()"){
 
-      x.name = newName;
+      const moved =
+        cloneNode(sourceNode);
+
+      removeNode(src);
+
+      if(!insertNode(destination,moved)){
+
+        toast(
+          "انتقال انجام نشد."
+        );
+
+        return true;
+      }
 
     }else{
 
       const copy =
-        JSON.parse(
-          JSON.stringify(x)
+        cloneNode(sourceNode);
+
+      if(!insertNode(destination,copy)){
+
+        toast(
+          "کپی انجام نشد."
         );
 
-      copy.name = newName;
-
-      VFS.root.children.push(copy);
+        return true;
+      }
     }
 
-    selectedPath = newName;
+    selectedPath =
+      destination;
 
     renderFileExplorer();
 
     renderLiveLog(
-      `${n} ${src} → ${dst}`
+      `${n} ${src} → ${destination}`
     );
 
     $("resultBody").innerHTML = `
       <div class="live-success">
-        ✓ ${
+
+        ✓
+        ${
           n==="move()"
             ? "آیتم جابه‌جا شد"
             : "یک کپی ایجاد شد"
         }
+
       </div>
 
       <p>
         <code dir="ltr">
-          shutil.${n.slice(0,-2)}
-          (${JSON.stringify(src)},
-           ${JSON.stringify(dst)})
+          shutil.${
+            n.slice(0,-2)
+          }(
+          ${JSON.stringify(src)},
+          ${JSON.stringify(destination)}
+          )
         </code>
       </p>
     `;
@@ -2189,13 +3770,50 @@ function statePreview(t,l,args={}){
     const dst =
       val("dst","DemoCopy");
 
-    const folder = {
-      type:"folder",
-      name:dst.split(/[\\/]/).pop(),
-      children:[]
-    };
+    const source =
+      getNode(src);
 
-    VFS.root.children.push(folder);
+    if(
+      !source ||
+      source.type !== "folder"
+    ){
+
+      toast(
+        `پوشه «${src}» پیدا نشد.`
+      );
+
+      return true;
+    }
+
+    const destination =
+      normalizeVirtualPath(dst);
+
+    if(getNode(destination)){
+
+      toast(
+        "پوشه مقصد از قبل وجود دارد."
+      );
+
+      return true;
+    }
+
+    const copy =
+      cloneNode(source);
+
+    copy.name =
+      getNodeName(destination);
+
+    if(!insertNode(destination,copy)){
+
+      toast(
+        "کپی پوشه انجام نشد."
+      );
+
+      return true;
+    }
+
+    selectedPath =
+      destination;
 
     renderFileExplorer();
 
@@ -2205,7 +3823,9 @@ function statePreview(t,l,args={}){
 
     $("resultBody").innerHTML = `
       <div class="live-success">
-        📁 پوشه «${escapeHtml(dst)}» کپی شد.
+        📁 پوشه
+        «${escapeHtml(dst)}»
+        کپی شد.
       </div>
     `;
 
@@ -2218,16 +3838,16 @@ function statePreview(t,l,args={}){
 
   if(n === "rmtree()"){
 
-    const target = val("path");
+    const target =
+      val("path");
 
-    const i =
-      VFS.root.children.findIndex(
-        x =>
-          x.name === target &&
-          x.type === "folder"
-      );
+    const node =
+      getNode(target);
 
-    if(i < 0){
+    if(
+      !node ||
+      node.type !== "folder"
+    ){
 
       toast(
         `پوشه «${target}» پیدا نشد.`
@@ -2236,7 +3856,18 @@ function statePreview(t,l,args={}){
       return true;
     }
 
-    VFS.root.children.splice(i,1);
+    removeNode(target);
+
+    if(
+      currentExplorerPath ===
+      normalizeVirtualPath(target) ||
+      currentExplorerPath.startsWith(
+        normalizeVirtualPath(target) + "/"
+      )
+    ){
+
+      currentExplorerPath = "";
+    }
 
     selectedPath = null;
 
@@ -2262,7 +3893,11 @@ function statePreview(t,l,args={}){
 
   if(n === "which()"){
 
-    const cmd = val("cmd","python");
+    const cmd =
+      val(
+        "cmd",
+        "python"
+      );
 
     $("resultBody").innerHTML = `
       <code dir="ltr">
@@ -2277,19 +3912,22 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- SEND2TRASH ---------- */
+  /* =====================================================
+     SEND2TRASH
+     ===================================================== */
 
   if(n === "send2trash()"){
 
     const target =
-      val("path",selectedPath || "");
-
-    const i =
-      VFS.root.children.findIndex(
-        x => x.name === target
+      val(
+        "path",
+        selectedPath || ""
       );
 
-    if(i < 0){
+    const node =
+      getNode(target);
+
+    if(!node){
 
       toast(
         `«${target}» پیدا نشد.`
@@ -2298,7 +3936,7 @@ function statePreview(t,l,args={}){
       return true;
     }
 
-    VFS.root.children.splice(i,1);
+    removeNode(target);
 
     selectedPath = null;
 
@@ -2313,6 +3951,11 @@ function statePreview(t,l,args={}){
         ♻ «${escapeHtml(target)}»
         به سطل زباله نمایشی منتقل شد.
       </div>
+
+      <p>
+        فایل از محیط فعال حذف شد ولی
+        این شبیه‌ساز سطل زباله واقعی سیستم را تغییر نمی‌دهد.
+      </p>
     `;
 
     $("resultStatus").textContent =
@@ -2322,15 +3965,26 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- FNMATCH ---------- */
+  /* =====================================================
+     FNMATCH
+     ===================================================== */
 
   if(n === "fnmatch()"){
 
-    const name = val("name","");
-    const pattern = val("pattern","*.txt");
+    const name =
+      val("name","");
+
+    const pattern =
+      val(
+        "pattern",
+        "*.txt"
+      );
 
     const result =
-      simplePatternMatch(name,pattern);
+      simplePatternMatch(
+        name,
+        pattern
+      );
 
     $("resultBody").innerHTML = `
       <code dir="ltr">
@@ -2358,27 +4012,34 @@ function statePreview(t,l,args={}){
   if(n === "filter()"){
 
     const pattern =
-      val("pattern","*.txt");
+      val(
+        "pattern",
+        "*.txt"
+      );
 
     const names =
-      VFS.root.children
-        .map(x => x.name)
+      getNode(".")?.children
+        ?.map(x => x.name)
         .filter(x =>
           simplePatternMatch(
             x,
             pattern
           )
-        );
+        ) || [];
 
     $("resultBody").innerHTML = `
       <div class="state-list">
+
         ${
           names.length
             ? names.map(x =>
-                `<span>${escapeHtml(x)}</span>`
+                `<span>
+                  ${escapeHtml(x)}
+                </span>`
               ).join("")
             : "<span>موردی پیدا نشد.</span>"
         }
+
       </div>
     `;
 
@@ -2389,17 +4050,39 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- FILECMP ---------- */
+  /* =====================================================
+     FILECMP
+     ===================================================== */
 
   if(
     ["cmp()","samefile()"].includes(n)
   ){
 
-    const f1 = val("f1","");
-    const f2 = val("f2","");
+    const f1 =
+      val("f1","");
 
-    const result =
-      f1 === f2;
+    const f2 =
+      val("f2","");
+
+    const node1 =
+      getNode(f1);
+
+    const node2 =
+      getNode(f2);
+
+    let result = false;
+
+    if(
+      node1 &&
+      node2 &&
+      node1.type === "file" &&
+      node2.type === "file"
+    ){
+
+      result =
+        JSON.stringify(node1) ===
+        JSON.stringify(node2);
+    }
 
     $("resultBody").innerHTML = `
       <code dir="ltr">
@@ -2436,14 +4119,24 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- HASHLIB ---------- */
+  /* =====================================================
+     HASHLIB
+     ===================================================== */
 
   if(
-    ["sha256()","sha512()","sha1()","md5()"].includes(n)
+    [
+      "sha256()",
+      "sha512()",
+      "sha1()",
+      "md5()"
+    ].includes(n)
   ){
 
     const data =
-      val("data","Hello Python");
+      val(
+        "data",
+        "Hello Python"
+      );
 
     const lengths = {
       "sha256()":64,
@@ -2452,10 +4145,14 @@ function statePreview(t,l,args={}){
       "md5()":32
     };
 
-    const len = lengths[n];
+    const len =
+      lengths[n];
 
     const fakeHash =
-      makeFakeHash(data,len);
+      makeFakeHash(
+        data,
+        len
+      );
 
     $("resultBody").innerHTML = `
       <div class="preview-progress">
@@ -2464,7 +4161,9 @@ function statePreview(t,l,args={}){
 
       <p>
         الگوریتم:
-        <b>${escapeHtml(n)}</b>
+        <b>
+          ${escapeHtml(n)}
+        </b>
       </p>
 
       <code dir="ltr">
@@ -2494,15 +4193,24 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- MIMETYPES ---------- */
+  /* =====================================================
+     MIMETYPES
+     ===================================================== */
 
   if(n === "guess_type()"){
 
     const filename =
-      val("url",selectedPath || "report.pdf");
+      val(
+        "url",
+        selectedPath ||
+        "report.pdf"
+      );
 
     const ext =
-      filename.toLowerCase().split(".").pop();
+      filename
+        .toLowerCase()
+        .split(".")
+        .pop();
 
     const map = {
       pdf:"application/pdf",
@@ -2526,8 +4234,12 @@ function statePreview(t,l,args={}){
       <code dir="ltr">
         ${escapeHtml(filename)}
       </code>
+
       →
-      <b>${map[ext] || "unknown"}</b>
+
+      <b>
+        ${map[ext] || "unknown"}
+      </b>
     `;
 
     $("resultStatus").textContent =
@@ -2540,7 +4252,10 @@ function statePreview(t,l,args={}){
   if(n === "guess_extension()"){
 
     const type =
-      val("type","application/pdf");
+      val(
+        "type",
+        "application/pdf"
+      );
 
     const map = {
       "application/pdf":".pdf",
@@ -2555,7 +4270,9 @@ function statePreview(t,l,args={}){
     };
 
     $("resultBody").innerHTML = `
-      <b>${map[type] || ".bin"}</b>
+      <b>
+        ${map[type] || ".bin"}
+      </b>
     `;
 
     $("resultStatus").textContent =
@@ -2565,11 +4282,18 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- TEMPFILE ---------- */
+  /* =====================================================
+     TEMPFILE
+     ===================================================== */
 
   if(
-    ["TemporaryDirectory()","TemporaryFile()",
-     "NamedTemporaryFile()","mkstemp()","mkdtemp()"].includes(n)
+    [
+      "TemporaryDirectory()",
+      "TemporaryFile()",
+      "NamedTemporaryFile()",
+      "mkstemp()",
+      "mkdtemp()"
+    ].includes(n)
   ){
 
     const name =
@@ -2594,16 +4318,25 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- TIME ---------- */
+  /* =====================================================
+     TIME
+     ===================================================== */
 
   if(n === "sleep()"){
 
     const seconds =
-      Number(val("seconds","2"));
+      Number(
+        val(
+          "seconds",
+          "2"
+        )
+      );
 
     $("resultBody").innerHTML = `
       ⏱ تأخیر شبیه‌سازی‌شده:
-      <b>${seconds} ثانیه</b>
+      <b>
+        ${seconds} ثانیه
+      </b>
 
       <div class="preview-progress">
         <i style="width:100%"></i>
@@ -2618,7 +4351,11 @@ function statePreview(t,l,args={}){
 
 
   if(
-    ["time()","perf_counter()","monotonic()"].includes(n)
+    [
+      "time()",
+      "perf_counter()",
+      "monotonic()"
+    ].includes(n)
   ){
 
     $("resultBody").innerHTML = `
@@ -2658,28 +4395,48 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- SYS / PLATFORM ---------- */
+  /* =====================================================
+     SYS / PLATFORM
+     ===================================================== */
 
   if(
-    ["platform.system()",
-     "platform.python_version()",
-     "platform.machine()",
-     "platform.processor()",
-     "sys.version",
-     "sys.platform",
-     "sys.executable",
-     "sys.argv"].includes(n)
+    [
+      "platform.system()",
+      "platform.python_version()",
+      "platform.machine()",
+      "platform.processor()",
+      "sys.version",
+      "sys.platform",
+      "sys.executable",
+      "sys.argv"
+    ].includes(n)
   ){
 
     const values = {
-      "platform.system()":"Windows",
-      "platform.python_version()":"3.11.x",
-      "platform.machine()":"AMD64",
-      "platform.processor()":"PythonLab CPU",
-      "sys.version":"3.11.x",
-      "sys.platform":"win32",
-      "sys.executable":"C:/Python311/python.exe",
-      "sys.argv":"['main.py']"
+
+      "platform.system()":
+        "Windows",
+
+      "platform.python_version()":
+        "3.11.x",
+
+      "platform.machine()":
+        "AMD64",
+
+      "platform.processor()":
+        "PythonLab CPU",
+
+      "sys.version":
+        "3.11.x",
+
+      "sys.platform":
+        "win32",
+
+      "sys.executable":
+        "C:/Python311/python.exe",
+
+      "sys.argv":
+        "['main.py']"
     };
 
     $("resultBody").innerHTML = `
@@ -2695,13 +4452,22 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- SQLITE ---------- */
+  /* =====================================================
+     SQLITE
+     ===================================================== */
 
   if(
-    ["connect()","cursor()","execute()",
-     "executemany()","fetchone()",
-     "fetchall()","commit()",
-     "rollback()","close()"].includes(n)
+    [
+      "connect()",
+      "cursor()",
+      "execute()",
+      "executemany()",
+      "fetchone()",
+      "fetchall()",
+      "commit()",
+      "rollback()",
+      "close()"
+    ].includes(n)
   ){
 
     $("resultBody").innerHTML = `
@@ -2710,18 +4476,22 @@ function statePreview(t,l,args={}){
       </div>
 
       <table class="preview-table">
+
         <tr>
           <th>id</th>
           <th>name</th>
         </tr>
+
         <tr>
           <td>1</td>
           <td>Ali</td>
         </tr>
+
         <tr>
           <td>2</td>
           <td>Sara</td>
         </tr>
+
       </table>
     `;
 
@@ -2732,12 +4502,22 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- PANDAS ---------- */
+  /* =====================================================
+     PANDAS
+     ===================================================== */
 
   if(
-    ["read_csv()","read_excel()","DataFrame()",
-     "head()","tail()","sort_values()",
-     "groupby()","describe()","info()"].includes(n)
+    [
+      "read_csv()",
+      "read_excel()",
+      "DataFrame()",
+      "head()",
+      "tail()",
+      "sort_values()",
+      "groupby()",
+      "describe()",
+      "info()"
+    ].includes(n)
   ){
 
     $("resultBody").innerHTML = `
@@ -2777,14 +4557,23 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- EXCEL ---------- */
+  /* =====================================================
+     EXCEL
+     ===================================================== */
 
   if(
-    ["Workbook()","load_workbook()",
-     "active","cell()","append()",
-     "save()","create_sheet()",
-     "remove()","max_row",
-     "max_column"].includes(n)
+    [
+      "Workbook()",
+      "load_workbook()",
+      "active",
+      "cell()",
+      "append()",
+      "save()",
+      "create_sheet()",
+      "remove()",
+      "max_row",
+      "max_column"
+    ].includes(n)
   ){
 
     $("resultBody").innerHTML = `
@@ -2804,13 +4593,20 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- IO ---------- */
+  /* =====================================================
+     IO
+     ===================================================== */
 
   if(
-    ["StringIO()","BytesIO()",
-     "read()","write()",
-     "seek()","tell()",
-     "getvalue()"].includes(n)
+    [
+      "StringIO()",
+      "BytesIO()",
+      "read()",
+      "write()",
+      "seek()",
+      "tell()",
+      "getvalue()"
+    ].includes(n)
   ){
 
     $("resultBody").innerHTML = `
@@ -2830,13 +4626,22 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- WATCHDOG ---------- */
+  /* =====================================================
+     WATCHDOG
+     ===================================================== */
 
   if(
-    ["Observer","schedule()","start()",
-     "stop()","join()",
-     "on_created()","on_deleted()",
-     "on_modified()","on_moved()"].includes(n)
+    [
+      "Observer",
+      "schedule()",
+      "start()",
+      "stop()",
+      "join()",
+      "on_created()",
+      "on_deleted()",
+      "on_modified()",
+      "on_moved()"
+    ].includes(n)
   ){
 
     $("resultBody").innerHTML = `
@@ -2856,13 +4661,23 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- SCHEDULE ---------- */
+  /* =====================================================
+     SCHEDULE
+     ===================================================== */
 
   if(
-    ["every()","seconds","minutes",
-     "hours","days","weeks",
-     "do()","run_pending()",
-     "clear()","cancel_job()"].includes(n)
+    [
+      "every()",
+      "seconds",
+      "minutes",
+      "hours",
+      "days",
+      "weeks",
+      "do()",
+      "run_pending()",
+      "clear()",
+      "cancel_job()"
+    ].includes(n)
   ){
 
     $("resultBody").innerHTML = `
@@ -2882,11 +4697,18 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- REQUESTS / HTTPX ---------- */
+  /* =====================================================
+     REQUESTS / HTTPX
+     ===================================================== */
 
   if(
-    ["get()","post()","put()",
-     "delete()","request()"].includes(n)
+    [
+      "get()",
+      "post()",
+      "put()",
+      "delete()",
+      "request()"
+    ].includes(n)
   ){
 
     $("resultBody").innerHTML = `
@@ -2910,12 +4732,18 @@ function statePreview(t,l,args={}){
 
 
   if(
-    ["status_code","json()","text",
-     "headers","raise_for_status()"].includes(n)
+    [
+      "status_code",
+      "json()",
+      "text",
+      "headers",
+      "raise_for_status()"
+    ].includes(n)
   ){
 
     $("resultBody").innerHTML = `
       <code dir="ltr">
+
         ${
           n==="status_code"
             ? "200"
@@ -2925,6 +4753,7 @@ function statePreview(t,l,args={}){
                 ? "Hello from server"
                 : '{"Content-Type":"application/json"}'
         }
+
       </code>
     `;
 
@@ -2935,13 +4764,20 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- DOCX ---------- */
+  /* =====================================================
+     DOCX
+     ===================================================== */
 
   if(
-    ["Document()","add_paragraph()",
-     "add_heading()","add_table()",
-     "add_page_break()","add_picture()",
-     "save()"].includes(n)
+    [
+      "Document()",
+      "add_paragraph()",
+      "add_heading()",
+      "add_table()",
+      "add_page_break()",
+      "add_picture()",
+      "save()"
+    ].includes(n)
   ){
 
     $("resultBody").innerHTML = `
@@ -2961,12 +4797,18 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- PPTX ---------- */
+  /* =====================================================
+     PPTX
+     ===================================================== */
 
   if(
-    ["Presentation()","add_slide()",
-     "add_textbox()","add_picture()",
-     "slide_layouts"].includes(n)
+    [
+      "Presentation()",
+      "add_slide()",
+      "add_textbox()",
+      "add_picture()",
+      "slide_layouts"
+    ].includes(n)
   ){
 
     $("resultBody").innerHTML = `
@@ -2986,7 +4828,9 @@ function statePreview(t,l,args={}){
   }
 
 
-  /* ---------- DEFAULT ---------- */
+  /* =====================================================
+     DEFAULT
+     ===================================================== */
 
   return false;
 }
@@ -2999,15 +4843,28 @@ function statePreview(t,l,args={}){
 function simplePatternMatch(name,pattern){
 
   const escaped =
-    pattern
-      .replace(/[.+^${}()|[\]\\]/g,"\\$&")
-      .replace(/\*/g,".*")
-      .replace(/\?/g,".");
+    String(pattern)
+      .replace(
+        /[.+^${}()|[\]\\]/g,
+        "\\$&"
+      )
+      .replace(
+        /\*/g,
+        ".*"
+      )
+      .replace(
+        /\?/g,
+        "."
+      );
 
   return new RegExp(
-    "^" + escaped + "$",
+    "^" +
+    escaped +
+    "$",
     "i"
-  ).test(name);
+  ).test(
+    String(name)
+  );
 }
 
 
@@ -3016,18 +4873,26 @@ function makeFakeHash(text,length){
   let seed = 0;
 
   for(let i=0;i<text.length;i++)
-    seed = (seed * 31 + text.charCodeAt(i)) >>> 0;
+    seed =
+      (
+        seed * 31 +
+        text.charCodeAt(i)
+      ) >>> 0;
 
   let result = "";
 
   for(let i=0;i<length;i++){
 
     seed =
-      (seed * 1664525 + 1013904223)
-      >>> 0;
+      (
+        seed * 1664525 +
+        1013904223
+      ) >>> 0;
 
     result +=
-      (seed % 16).toString(16);
+      (
+        seed % 16
+      ).toString(16);
   }
 
   return result;
@@ -3040,21 +4905,38 @@ function makeFakeHash(text,length){
 
 function openModal(t,l){
 
-  $("modalTitle").textContent = t[0];
-  $("modalDesc").textContent = t[1];
-  $("modalSignature").textContent = t[2];
-  $("modalWhat").textContent = t[1];
-  $("modalArgs").textContent = t[3];
-  $("modalType").textContent = l.name;
-  $("modalOutput").textContent = t[4];
+  $("modalTitle").textContent =
+    t[0];
 
-  $("modalBackdrop").classList.add("open");
+  $("modalDesc").textContent =
+    t[1];
+
+  $("modalSignature").textContent =
+    t[2];
+
+  $("modalWhat").textContent =
+    t[1];
+
+  $("modalArgs").textContent =
+    t[3];
+
+  $("modalType").textContent =
+    l.name;
+
+  $("modalOutput").textContent =
+    t[4];
+
+  $("modalBackdrop")
+    .classList
+    .add("open");
 }
 
 
 function closeModal(){
 
-  $("modalBackdrop").classList.remove("open");
+  $("modalBackdrop")
+    .classList
+    .remove("open");
 }
 
 
@@ -3071,13 +4953,19 @@ function copyCode(){
 
     navigator.clipboard
       .writeText(text)
-      .then(() => toast("کد کپی شد."))
-      .catch(() => toast("کپی انجام نشد."));
+      .then(() =>
+        toast("کد کپی شد.")
+      )
+      .catch(() =>
+        toast("کپی انجام نشد.")
+      );
   }
 
   else {
 
-    toast("مرورگر اجازه کپی خودکار نداد.");
+    toast(
+      "مرورگر اجازه کپی خودکار نداد."
+    );
   }
 }
 
@@ -3088,16 +4976,20 @@ function copyCode(){
 
 function toast(msg){
 
-  const t = $("toast");
+  const t =
+    $("toast");
 
-  if(!t) return;
+  if(!t)
+    return;
 
-  t.textContent = msg;
+  t.textContent =
+    msg;
 
   t.classList.add("show");
 
   setTimeout(
-    () => t.classList.remove("show"),
+    () =>
+      t.classList.remove("show"),
     1800
   );
 }
