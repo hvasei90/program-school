@@ -1,725 +1,610 @@
+/* =========================================================
+   Python Toolkit Lab
+   Expanded + Stateful Virtual Simulator
+   ========================================================= */
+
 const LIBS = [
-  {id:"os",name:"os",icon:"⌂",cat:"استاندارد",desc:"کار با سیستم‌عامل، مسیرها، فایل‌ها و پوشه‌ها",tools:[
-    ["getcwd()","نمایش مسیر فعلی","os.getcwd()","بدون آرگومان","مسیر پوشه‌ی فعلی را برمی‌گرداند","رشته‌ی مسیر"],
-    ["listdir()","نمایش محتویات پوشه","os.listdir(path)","path اختیاری","نام فایل‌ها و پوشه‌ها را می‌گیرد","لیست نام‌ها"],
-    ["mkdir()","ساخت یک پوشه","os.mkdir(path)","path","یک پوشه ایجاد می‌کند","پوشه‌ی جدید"],
-    ["makedirs()","ساخت پوشه‌های تو‌در‌تو","os.makedirs(path, exist_ok=False)","path, exist_ok","چند سطح پوشه را ایجاد می‌کند","ساختار پوشه"],
-    ["remove()","حذف فایل","os.remove(path)","path","یک فایل را حذف می‌کند","بدون خروجی"],
-    ["rename()","تغییر نام/مسیر","os.rename(src, dst)","src, dst","فایل یا پوشه را جابه‌جا/نام‌گذاری می‌کند","بدون خروجی"]
-  ]},
-  {id:"pathlib",name:"pathlib",icon:"◈",cat:"فایل",desc:"کار مدرن و شیءگرا با مسیرها و فایل‌ها",tools:[
-    ["Path()","ساخت شیء مسیر","Path(path)","path","یک مسیر قابل پردازش می‌سازد","Path object"],
-    ["exists()","بررسی وجود مسیر","Path(path).exists()","—","وجود فایل/پوشه را بررسی می‌کند","True / False"],
-    ["glob()","پیدا کردن فایل با الگو","Path(path).glob(pattern)","pattern","فایل‌های مطابق الگو را پیدا می‌کند","iterator"],
-    ["read_text()","خواندن متن فایل","Path(path).read_text()","encoding اختیاری","محتوای متنی فایل را می‌خواند","str"],
-    ["write_text()","نوشتن متن فایل","Path(path).write_text(text)","text, encoding","متن را در فایل می‌نویسد","تعداد کاراکتر"]
-  ]},
-  {id:"shutil",name:"shutil",icon:"↔",cat:"فایل",desc:"کپی، جابه‌جایی و مدیریت سطح بالاتر فایل‌ها",tools:[
-    ["copy()","کپی فایل","shutil.copy(src, dst)","src, dst","فایل را کپی می‌کند","مسیر مقصد"],
-    ["copytree()","کپی یک پوشه","shutil.copytree(src, dst)","src, dst","کل ساختار پوشه را کپی می‌کند","پوشه‌ی جدید"],
-    ["move()","جابه‌جایی","shutil.move(src, dst)","src, dst","فایل یا پوشه را منتقل می‌کند","مسیر جدید"],
-    ["rmtree()","حذف پوشه و محتویات","shutil.rmtree(path)","path","یک پوشه را همراه محتویات حذف می‌کند","بدون خروجی"],
-    ["disk_usage()","اطلاعات فضای دیسک","shutil.disk_usage(path)","path","فضای کل، استفاده‌شده و آزاد را می‌دهد","total/used/free"]
-  ]},
-  {id:"concurrent.futures",name:"concurrent.futures",icon:"⚡",cat:"هم‌زمانی",desc:"اجرای چند کار به‌صورت هم‌زمان",tools:[
-    ["ThreadPoolExecutor","اجرای هم‌زمان کارهای I/O","ThreadPoolExecutor(max_workers=None)","تعداد worker اختیاری","چند کار ورودی/خروجی را هم‌زمان اجرا می‌کند","Futureها"],
-    ["ProcessPoolExecutor","اجرای کارهای سنگین CPU","ProcessPoolExecutor(max_workers=None)","تعداد worker اختیاری","کارها را در processهای جدا اجرا می‌کند","Futureها"],
-    ["submit()","ارسال یک کار","executor.submit(fn, *args)","تابع + آرگومان‌ها","یک کار را برای اجرا می‌فرستد","Future"],
-    ["map()","اجرای تابع روی چند داده","executor.map(fn, iterable)","تابع + داده‌ها","تابع را روی چند ورودی اجرا می‌کند","نتایج ترتیبی"],
-    ["result()","دریافت نتیجه","future.result(timeout=None)","timeout اختیاری","نتیجه‌ی کار را دریافت می‌کند","مقدار تابع"]
-  ]},
-  {id:"hashlib",name:"hashlib",icon:"#",cat:"امنیت",desc:"ساخت hash برای بررسی یکپارچگی و شناسه‌ی داده",tools:[
-    ["sha256()","ساخت SHA-256","hashlib.sha256(data)","data به صورت bytes","یک hash 256 بیتی می‌سازد","hash object"],
-    ["hexdigest()","نمایش hash به صورت متنی","hash.hexdigest()","—","hash را به رشته‌ی hex تبدیل می‌کند","64 کاراکتر"],
-    ["md5()","ساخت MD5","hashlib.md5(data)","bytes","hash قدیمی برای کاربردهای غیرامنیتی","32 کاراکتر hex"]
-  ]},
-  {id:"openpyxl",name:"openpyxl",icon:"▦",cat:"داده",desc:"خواندن و ساخت فایل‌های Excel با فرمت xlsx",tools:[
-    ["Workbook()","ساخت Excel جدید","Workbook()","—","یک workbook تازه می‌سازد","Workbook"],
-    ["load_workbook()","باز کردن Excel","load_workbook(filename)","filename","فایل xlsx را باز می‌کند","Workbook"],
-    ["active","انتخاب Sheet فعال","workbook.active","—","برگه‌ی فعال را برمی‌گرداند","Worksheet"],
-    ["cell()","دسترسی به سلول","sheet.cell(row, column)","row, column","یک سلول مشخص را انتخاب می‌کند","Cell"],
-    ["append()","افزودن ردیف","sheet.append(iterable)","لیست/iterable","یک ردیف به انتهای جدول اضافه می‌کند","بدون خروجی"],
-    ["save()","ذخیره Excel","workbook.save(filename)","filename","فایل را ذخیره می‌کند","فایل xlsx"]
-  ]},
-  {id:"pandas",name:"pandas",icon:"▤",cat:"داده",desc:"پردازش و تحلیل داده‌های جدولی",tools:[
-    ["read_csv()","خواندن CSV","pd.read_csv(path)","path + options","داده‌ی CSV را به DataFrame تبدیل می‌کند","DataFrame"],
-    ["read_excel()","خواندن Excel","pd.read_excel(path)","path + options","داده‌ی Excel را می‌خواند","DataFrame"],
-    ["DataFrame()","ساخت جدول داده","pd.DataFrame(data)","data","ساختار جدولی داده می‌سازد","DataFrame"],
-    ["head()","نمایش چند ردیف اول","df.head(n=5)","n اختیاری","ابتدای جدول را نمایش می‌دهد","DataFrame"],
-    ["drop()","حذف ردیف/ستون","df.drop(labels, axis=0)","labels, axis","بخش‌هایی از جدول را حذف می‌کند","DataFrame"],
-    ["sort_values()","مرتب‌سازی داده‌ها","df.sort_values(by)","by + options","داده را بر اساس ستون مرتب می‌کند","DataFrame"],
-    ["to_csv()","ذخیره CSV","df.to_csv(path)","path + options","DataFrame را CSV می‌کند","فایل CSV"],
-    ["to_excel()","ذخیره Excel","df.to_excel(path)","path + options","DataFrame را Excel می‌کند","فایل xlsx"]
-  ]},
-  {id:"watchdog",name:"watchdog",icon:"◉",cat:"فایل",desc:"نظارت بر تغییرات فایل‌ها و پوشه‌ها",tools:[
-    ["Observer","ایجاد ناظر","Observer()","—","یک ناظر فایل ایجاد می‌کند","Observer"],
-    ["FileSystemEventHandler","تعریف واکنش","FileSystemEventHandler","—","رویدادهای فایل را مدیریت می‌کند","handler"],
-    ["schedule()","تعیین پوشه برای نظارت","observer.schedule(handler, path, recursive=False)","handler, path, recursive","مسیر و handler را متصل می‌کند","بدون خروجی"],
-    ["start()","شروع نظارت","observer.start()","—","نظارت را آغاز می‌کند","thread"],
-    ["stop()","توقف نظارت","observer.stop()","—","نظارت را متوقف می‌کند","بدون خروجی"],
-    ["join()","منتظر ماندن","observer.join()","—","تا پایان thread صبر می‌کند","بدون خروجی"]
-  ]},
-  {id:"schedule",name:"schedule",icon:"◷",cat:"زمان",desc:"اجرای خودکار کارها طبق زمان‌بندی",tools:[
-    ["every()","تعیین فاصله","schedule.every(interval)","عدد فاصله","فاصله‌ی زمانی اجرای کار را تعیین می‌کند","Job"],
-    ["seconds","واحد ثانیه","schedule.every(10).seconds","—","زمان‌بندی بر اساس ثانیه","Job"],
-    ["minutes","واحد دقیقه","schedule.every(5).minutes","—","زمان‌بندی بر اساس دقیقه","Job"],
-    ["hours","واحد ساعت","schedule.every(2).hours","—","زمان‌بندی بر اساس ساعت","Job"],
-    ["days","واحد روز","schedule.every().day","—","زمان‌بندی روزانه","Job"],
-    ["do()","تعیین تابع","job.do(fn)","تابع + آرگومان‌ها","مشخص می‌کند چه کاری انجام شود","Job"],
-    ["run_pending()","اجرای کارهای موعدرسیده","schedule.run_pending()","—","Jobهای آماده را اجرا می‌کند","بدون خروجی"]
-  ]},
-  {id:"send2trash",name:"Send2Trash",icon:"♻",cat:"فایل",desc:"انتقال فایل به سطل زباله به‌جای حذف مستقیم",tools:[
-    ["send2trash()","انتقال به Recycle Bin / Trash","send2trash(path)","path","فایل یا پوشه را به سطل زباله می‌فرستد","بدون خروجی"]
-  ]},
-  {id:"fnmatch",name:"fnmatch",icon:"✣",cat:"فایل",desc:"تطبیق نام فایل‌ها با الگوهایی مثل *.txt",tools:[
-    ["fnmatch()","تطبیق نام با الگو","fnmatch(name, pattern)","name, pattern","بررسی می‌کند نام با الگو سازگار است یا نه","True / False"],
-    ["filter()","فیلتر کردن نام‌ها","filter(names, pattern)","names, pattern","نام‌های مطابق الگو را جدا می‌کند","list"]
-  ]},
-  {id:"filecmp",name:"filecmp",icon:"≋",cat:"فایل",desc:"مقایسه فایل‌ها و پوشه‌ها",tools:[
-    ["cmp()","مقایسه دو فایل","filecmp.cmp(f1, f2)","دو مسیر فایل","برابری محتوا را بررسی می‌کند","True / False"],
-    ["cmpfiles()","مقایسه مجموعه فایل‌ها","filecmp.cmpfiles(dir1, dir2, common)","دو پوشه + نام‌ها","فایل‌های مشترک را مقایسه می‌کند","گزارش مقایسه"],
-    ["dircmp()","مقایسه دو پوشه","filecmp.dircmp(a, b)","دو مسیر پوشه","تفاوت ساختار دو پوشه را بررسی می‌کند","Dircmp"]
-  ]},
-  {id:"tempfile",name:"tempfile",icon:"▧",cat:"فایل",desc:"ساخت فایل‌ها و پوشه‌های موقت",tools:[
-    ["TemporaryFile()","ساخت فایل موقت","tempfile.TemporaryFile()","options اختیاری","فایل موقتی می‌سازد که بعداً پاک می‌شود","file object"],
-    ["NamedTemporaryFile()","فایل موقت با نام","NamedTemporaryFile()","options","فایل موقت قابل نام‌گذاری ایجاد می‌کند","file object"],
-    ["TemporaryDirectory()","پوشه موقت","TemporaryDirectory()","options","یک پوشه‌ی موقت می‌سازد","directory path"],
-    ["gettempdir()","مسیر پوشه موقت","gettempdir()","—","محل پیش‌فرض فایل‌های موقت را می‌دهد","str"]
-  ]},
-  {id:"stat",name:"stat",icon:"◫",cat:"فایل",desc:"اطلاعات و ویژگی‌های فایل مانند اندازه و مجوزها",tools:[
-    ["stat()","گرفتن اطلاعات فایل","os.stat(path)","path","اطلاعات metadata فایل را می‌گیرد","stat_result"],
-    ["S_ISREG()","بررسی فایل معمولی","stat.S_ISREG(mode)","mode","نوع فایل را بررسی می‌کند","True / False"],
-    ["S_ISDIR()","بررسی پوشه","stat.S_ISDIR(mode)","mode","تشخیص می‌دهد مسیر پوشه است یا نه","True / False"]
-  ]},
-  {id:"io",name:"io",icon:"↯",cat:"استاندارد",desc:"کار با جریان‌های داده و خواندن/نوشتن در حافظه",tools:[
-    ["StringIO()","جریان متنی در حافظه","io.StringIO(initial_value='')","متن اولیه اختیاری","مثل یک فایل متنی اما در RAM","stream"],
-    ["BytesIO()","جریان بایتی در حافظه","io.BytesIO(initial_bytes=b'')","bytes اختیاری","داده‌ی باینری را در RAM نگه می‌دارد","stream"],
-    ["read()","خواندن جریان","stream.read(size=-1)","size اختیاری","بخشی یا همه‌ی داده را می‌خواند","str / bytes"],
-    ["write()","نوشتن در جریان","stream.write(data)","data","داده را در جریان می‌نویسد","تعداد کاراکتر/بایت"]
-  ]},
-  {id:"mimetypes",name:"mimetypes",icon:"⊙",cat:"فایل",desc:"تشخیص نوع MIME فایل از روی پسوند",tools:[
-    ["guess_type()","تشخیص نوع فایل","mimetypes.guess_type(url)","نام فایل/URL","نوع MIME احتمالی را حدس می‌زند","tuple"],
-    ["guess_extension()","حدس پسوند","mimetypes.guess_extension(type)","MIME type","پسوند مناسب یک MIME type را برمی‌گرداند","str"]
-  ]},
-  {id:"tarfile",name:"tarfile",icon:"▱",cat:"فایل",desc:"ساخت و استخراج آرشیوهای tar",tools:[
-    ["open()","باز کردن/ساخت آرشیو","tarfile.open(name, mode)","name, mode","یک آرشیو tar را باز یا ایجاد می‌کند","TarFile"],
-    ["add()","افزودن فایل به آرشیو","tar.add(name)","name","فایل/پوشه را وارد آرشیو می‌کند","بدون خروجی"],
-    ["extractall()","استخراج آرشیو","tar.extractall(path)","path","محتویات آرشیو را استخراج می‌کند","فایل‌ها"]
-  ]},
-  {id:"gzip / bz2 / lzma",name:"gzip / bz2 / lzma",icon:"≋",cat:"فشرده‌سازی",desc:"فشرده‌سازی و استخراج با فرمت‌های مختلف",tools:[
-    ["gzip.open()","خواندن/نوشتن gzip","gzip.open(filename, mode)","filename, mode","فایل gzip را باز می‌کند","file object"],
-    ["bz2.open()","کار با BZ2","bz2.open(filename, mode)","filename, mode","فایل bzip2 را باز می‌کند","file object"],
-    ["lzma.open()","کار با LZMA/XZ","lzma.open(filename, mode)","filename, mode","فایل xz/lzma را باز می‌کند","file object"]
-  ]},
-  {id:"requests",name:"requests",icon:"↯",cat:"وب",desc:"ارسال درخواست HTTP و ارتباط با APIها",tools:[
-    ["get()","ارسال GET","requests.get(url, params=None)","url, params و options","داده را از یک URL درخواست می‌کند","Response"],
-    ["post()","ارسال POST","requests.post(url, data=None, json=None)","url + data/json","داده را به سرور می‌فرستد","Response"],
-    ["status_code","کد وضعیت پاسخ","response.status_code","—","کد HTTP پاسخ را می‌خواند","مثل 200"],
-    ["json()","خواندن JSON پاسخ","response.json()","—","بدنه JSON را به Python تبدیل می‌کند","dict/list"]
-  ]},
-  {id:"argparse",name:"argparse",icon:"›_",cat:"استاندارد",desc:"ساخت ابزارهای خط فرمان و دریافت آرگومان‌ها",tools:[
-    ["ArgumentParser()","ساخت parser","argparse.ArgumentParser()","description و options","شیء مدیریت آرگومان‌ها را می‌سازد","ArgumentParser"],
-    ["add_argument()","تعریف آرگومان","parser.add_argument(name, ...)","نام + options","یک گزینه‌ی خط فرمان اضافه می‌کند","Action"],
-    ["parse_args()","خواندن آرگومان‌ها","parser.parse_args()","—","ورودی خط فرمان را پردازش می‌کند","Namespace"]
-  ]},
-  {id:"xml.etree.ElementTree",name:"ElementTree",icon:"◇",cat:"داده",desc:"خواندن، ساخت و پردازش XML",tools:[
-    ["parse()","خواندن XML از فایل","ET.parse(source)","source","یک فایل XML را parse می‌کند","ElementTree"],
-    ["fromstring()","خواندن XML از متن","ET.fromstring(text)","text","رشته XML را به درخت تبدیل می‌کند","Element"],
-    ["find()","پیدا کردن عنصر","root.find(match)","الگو","اولین عنصر مطابق را پیدا می‌کند","Element"],
-    ["Element()","ساخت عنصر","ET.Element(tag)","tag","یک عنصر XML می‌سازد","Element"]
-  ]},
-  {id:"configparser",name:"configparser",icon:"⚙",cat:"تنظیمات",desc:"خواندن و مدیریت فایل‌های تنظیمات INI",tools:[
-    ["ConfigParser()","ساخت parser تنظیمات","configparser.ConfigParser()","—","یک parser برای INI می‌سازد","ConfigParser"],
-    ["read()","خواندن فایل تنظیمات","config.read(filename)","filename","فایل INI را می‌خواند","list"],
-    ["get()","گرفتن مقدار","config.get(section, option)","section, option","مقدار یک گزینه را می‌خواند","str"],
-    ["set()","تنظیم مقدار","config.set(section, option, value)","سه آرگومان","مقدار یک گزینه را تغییر می‌دهد","بدون خروجی"]
-  ]},
-  {id:"time",name:"time",icon:"◷",cat:"زمان",desc:"زمان، تأخیر و اندازه‌گیری مدت اجرای کد",tools:[
-    ["time()","زمان فعلی Unix","time.time()","—","زمان فعلی را به ثانیه برمی‌گرداند","float"],
-    ["sleep()","ایجاد تأخیر","time.sleep(seconds)","seconds","اجرای برنامه را متوقف می‌کند","بدون خروجی"],
-    ["perf_counter()","اندازه‌گیری دقیق زمان","time.perf_counter()","—","برای benchmark مناسب است","float"]
-  ]},
-  {id:"sys / platform",name:"sys / platform",icon:"⌘",cat:"سیستم",desc:"اطلاعات پایتون و سیستم‌عامل",tools:[
-    ["sys.version","نسخه Python","sys.version","—","اطلاعات نسخه Python را می‌دهد","str"],
-    ["sys.argv","آرگومان‌های اجرا","sys.argv","—","لیست آرگومان‌های خط فرمان","list"],
-    ["platform.system()","نام سیستم‌عامل","platform.system()","—","نام OS را برمی‌گرداند","str"],
-    ["platform.python_version()","نسخه Python","platform.python_version()","—","نسخه Python را برمی‌گرداند","str"]
-  ]},
-  {id:"threading / multiprocessing",name:"threading / multiprocessing",icon:"⚙",cat:"هم‌زمانی",desc:"اجرای هم‌زمان کارها در thread و process",tools:[
-    ["Thread()","ساخت thread","threading.Thread(target=fn)","target + args","یک thread جدید می‌سازد","Thread"],
-    ["start()","شروع thread","thread.start()","—","اجرای thread را آغاز می‌کند","بدون خروجی"],
-    ["join()","انتظار برای پایان","thread.join()","timeout اختیاری","منتظر پایان thread می‌ماند","بدون خروجی"],
-    ["Process()","ساخت process","multiprocessing.Process(target=fn)","target + args","یک process جدا ایجاد می‌کند","Process"]
-  ]},
-  {id:"sqlite3",name:"sqlite3",icon:"▣",cat:"داده",desc:"کار با SQLite بدون نیاز به سرور",tools:[
-    ["connect()","اتصال به دیتابیس","sqlite3.connect(database)","مسیر دیتابیس","یک اتصال SQLite ایجاد می‌کند","Connection"],
-    ["cursor()","ساخت cursor","connection.cursor()","—","برای اجرای SQL استفاده می‌شود","Cursor"],
-    ["execute()","اجرای SQL","cursor.execute(sql, params)","SQL + params","یک دستور SQL اجرا می‌کند","Cursor"],
-    ["fetchall()","گرفتن نتایج","cursor.fetchall()","—","تمام ردیف‌های نتیجه را می‌گیرد","list"]
-  ]},
-  {id:"PDF tools",name:"PDF tools",icon:"▤",cat:"اسناد",desc:"خواندن، ویرایش، تبدیل و پردازش PDF",tools:[
-    ["PdfReader","خواندن PDF","PdfReader(filename)","filename","PDF را برای خواندن باز می‌کند","Reader"],
-    ["PdfWriter","ساخت/ویرایش PDF","PdfWriter()","—","برای ایجاد خروجی PDF استفاده می‌شود","Writer"],
-    ["fitz.open()","باز کردن PDF با PyMuPDF","fitz.open(filename)","filename","PDF را برای پردازش باز می‌کند","Document"],
-    ["convert_from_path()","تبدیل PDF به تصویر","convert_from_path(pdf_path)","path + options","صفحات PDF را به تصویر تبدیل می‌کند","images"]
-  ]},
-  {id:"python-docx",name:"python-docx",icon:"W",cat:"اسناد",desc:"ساخت و ویرایش فایل‌های Word",tools:[
-    ["Document()","ساخت Word","Document()","—","یک سند Word جدید می‌سازد","Document"],
-    ["add_paragraph()","افزودن پاراگراف","document.add_paragraph(text)","text اختیاری","یک پاراگراف اضافه می‌کند","Paragraph"],
-    ["add_table()","ساخت جدول","document.add_table(rows, cols)","rows, cols","جدول ایجاد می‌کند","Table"],
-    ["save()","ذخیره Word","document.save(path)","path","سند را ذخیره می‌کند","docx"]
-  ]},
-  {id:"python-pptx",name:"python-pptx",icon:"P",cat:"اسناد",desc:"ساخت و ویرایش PowerPoint",tools:[
-    ["Presentation()","ساخت ارائه","Presentation()","template اختیاری","یک ارائه PowerPoint می‌سازد","Presentation"],
-    ["add_slide()","افزودن اسلاید","prs.slides.add_slide(layout)","layout","یک اسلاید اضافه می‌کند","Slide"],
-    ["add_textbox()","افزودن کادر متن","slide.shapes.add_textbox(...)","مختصات + اندازه","کادر متنی ایجاد می‌کند","Shape"],
-    ["save()","ذخیره PowerPoint","prs.save(path)","path","فایل pptx را ذخیره می‌کند","pptx"]
-  ]},
-  {id:"watchfiles",name:"watchfiles",icon:"◉",cat:"فایل",desc:"راه ساده برای شناسایی تغییرات فایل‌ها و پوشه‌ها",tools:[
-    ["watch()","نظارت بر تغییرات","watch(path)","path + options","تغییرات فایل‌ها را دنبال می‌کند","changes"],
-    ["Change","نوع تغییر","Change.added / modified / deleted","—","نوع تغییر را مشخص می‌کند","enum"]
-  ]},
-  {id:"APScheduler",name:"APScheduler",icon:"◷",cat:"زمان",desc:"زمان‌بندی پیشرفته‌ی کارهای خودکار",tools:[
-    ["BackgroundScheduler()","ساخت scheduler","BackgroundScheduler()","options","زمان‌بند پس‌زمینه می‌سازد","Scheduler"],
-    ["add_job()","افزودن کار زمان‌بندی‌شده","scheduler.add_job(func, trigger, ...)","تابع + trigger + options","یک job را زمان‌بندی می‌کند","Job"],
-    ["start()","شروع scheduler","scheduler.start()","—","زمان‌بند را فعال می‌کند","بدون خروجی"],
-    ["shutdown()","خاموش کردن","scheduler.shutdown()","wait=True","scheduler را متوقف می‌کند","بدون خروجی"]
-  ]},
-  {id:"httpx",name:"httpx",icon:"↯",cat:"وب",desc:"درخواست HTTP مدرن به شکل همگام و غیرهمگام",tools:[
-    ["get()","GET همگام","httpx.get(url)","url + options","درخواست GET می‌فرستد","Response"],
-    ["Client()","کلاینت HTTP","httpx.Client()","options","اتصالات و تنظیمات مشترک را مدیریت می‌کند","Client"],
-    ["AsyncClient()","کلاینت async","httpx.AsyncClient()","options","درخواست‌های asynchronous را مدیریت می‌کند","AsyncClient"],
-    ["aclose()","بستن کلاینت async","await client.aclose()","—","منابع کلاینت را آزاد می‌کند","بدون خروجی"]
-  ]},
-  {id:"filelock",name:"filelock",icon:"🔒",cat:"فایل",desc:"جلوگیری از دسترسی هم‌زمان چند برنامه به یک فایل",tools:[
-    ["FileLock()","ساخت قفل فایل","FileLock(lock_file)","مسیر فایل قفل","یک قفل برای فایل ایجاد می‌کند","FileLock"],
-    ["acquire()","گرفتن قفل","lock.acquire(timeout=-1)","timeout اختیاری","تا گرفتن قفل صبر می‌کند","Lock"],
-    ["release()","آزاد کردن قفل","lock.release()","—","قفل را آزاد می‌کند","بدون خروجی"]
-  ]}
+  {
+    id:"os", name:"os", icon:"⌂", cat:"استاندارد",
+    desc:"کار با سیستم‌عامل، مسیرها، فایل‌ها و پوشه‌ها",
+    tools:[
+      ["getcwd()","نمایش مسیر فعلی","os.getcwd()","بدون آرگومان","مسیر پوشه‌ی فعلی را برمی‌گرداند","رشته‌ی مسیر"],
+      ["listdir()","نمایش محتویات پوشه","os.listdir(path)","path اختیاری","نام فایل‌ها و پوشه‌ها را می‌گیرد","لیست نام‌ها"],
+      ["mkdir()","ساخت یک پوشه","os.mkdir(path)","path","یک پوشه ایجاد می‌کند","پوشه‌ی جدید"],
+      ["makedirs()","ساخت پوشه‌های تو‌در‌تو","os.makedirs(path, exist_ok=False)","path, exist_ok","چند سطح پوشه را ایجاد می‌کند","ساختار پوشه"],
+      ["remove()","حذف فایل","os.remove(path)","path","یک فایل را حذف می‌کند","بدون خروجی"],
+      ["rename()","تغییر نام/مسیر","os.rename(src, dst)","src, dst","فایل یا پوشه را تغییر نام می‌دهد","بدون خروجی"],
+      ["replace()","جایگزینی فایل/مسیر","os.replace(src, dst)","src, dst","مسیر مقصد را با مبدا جایگزین می‌کند","بدون خروجی"],
+      ["getsize()","اندازه فایل","os.path.getsize(path)","path","اندازه فایل را برحسب بایت می‌دهد","int"],
+      ["isfile()","بررسی فایل بودن","os.path.isfile(path)","path","بررسی می‌کند مسیر یک فایل است","True / False"],
+      ["isdir()","بررسی پوشه بودن","os.path.isdir(path)","path","بررسی می‌کند مسیر یک پوشه است","True / False"],
+      ["abspath()","ساخت مسیر مطلق","os.path.abspath(path)","path","مسیر مطلق را تولید می‌کند","str"],
+      ["basename()","گرفتن نام فایل","os.path.basename(path)","path","آخرین بخش مسیر را برمی‌گرداند","str"],
+      ["dirname()","گرفتن پوشه والد","os.path.dirname(path)","path","پوشه والد مسیر را می‌دهد","str"],
+      ["join()","ساخت مسیر","os.path.join(a, b)","a, b","چند بخش مسیر را ترکیب می‌کند","str"]
+    ]
+  },
+
+  {
+    id:"pathlib", name:"pathlib", icon:"◈", cat:"فایل",
+    desc:"کار مدرن و شیءگرا با مسیرها و فایل‌ها",
+    tools:[
+      ["Path()","ساخت شیء مسیر","Path(path)","path","یک مسیر قابل پردازش می‌سازد","Path object"],
+      ["exists()","بررسی وجود مسیر","Path(path).exists()","path","وجود فایل یا پوشه را بررسی می‌کند","True / False"],
+      ["is_file()","بررسی فایل بودن","Path(path).is_file()","path","بررسی می‌کند مسیر فایل است","True / False"],
+      ["is_dir()","بررسی پوشه بودن","Path(path).is_dir()","path","بررسی می‌کند مسیر پوشه است","True / False"],
+      ["glob()","پیدا کردن فایل با الگو","Path(path).glob(pattern)","path, pattern","فایل‌های مطابق الگو را پیدا می‌کند","iterator"],
+      ["iterdir()","پیمایش محتویات","Path(path).iterdir()","path","محتویات یک پوشه را پیمایش می‌کند","iterator"],
+      ["read_text()","خواندن متن فایل","Path(path).read_text()","path, encoding اختیاری","محتوای متنی فایل را می‌خواند","str"],
+      ["write_text()","نوشتن متن فایل","Path(path).write_text(text)","path, text","متن را در فایل می‌نویسد","int"],
+      ["mkdir()","ساخت پوشه","Path(path).mkdir()","path","پوشه ایجاد می‌کند","بدون خروجی"],
+      ["unlink()","حذف فایل","Path(path).unlink()","path","فایل را حذف می‌کند","بدون خروجی"],
+      ["rename()","تغییر نام","Path(path).rename(target)","path, target","نام یا مسیر را تغییر می‌دهد","Path"],
+      ["suffix","گرفتن پسوند","Path(path).suffix","path","پسوند فایل را برمی‌گرداند","str"],
+      ["name","گرفتن نام","Path(path).name","path","نام فایل یا پوشه را می‌دهد","str"]
+    ]
+  },
+
+  {
+    id:"shutil", name:"shutil", icon:"↔", cat:"فایل",
+    desc:"کپی، جابه‌جایی و مدیریت سطح بالاتر فایل‌ها",
+    tools:[
+      ["copy()","کپی فایل","shutil.copy(src, dst)","src, dst","فایل را کپی می‌کند","مسیر مقصد"],
+      ["copy2()","کپی همراه metadata","shutil.copy2(src, dst)","src, dst","فایل را همراه metadata کپی می‌کند","مسیر مقصد"],
+      ["copytree()","کپی یک پوشه","shutil.copytree(src, dst)","src, dst","کل ساختار پوشه را کپی می‌کند","پوشه‌ی جدید"],
+      ["move()","جابه‌جایی","shutil.move(src, dst)","src, dst","فایل یا پوشه را منتقل می‌کند","مسیر جدید"],
+      ["rmtree()","حذف پوشه و محتویات","shutil.rmtree(path)","path","یک پوشه را همراه محتویات حذف می‌کند","بدون خروجی"],
+      ["disk_usage()","اطلاعات فضای دیسک","shutil.disk_usage(path)","path","فضای کل، استفاده‌شده و آزاد را می‌دهد","total/used/free"],
+      ["which()","پیدا کردن برنامه","shutil.which(cmd)","cmd","مسیر اجرای یک برنامه را پیدا می‌کند","str / None"],
+      ["make_archive()","ساخت آرشیو","shutil.make_archive(base, format, root)","base, format, root","از فایل‌ها آرشیو می‌سازد","مسیر آرشیو"]
+    ]
+  },
+
+  {
+    id:"concurrent.futures", name:"concurrent.futures", icon:"⚡", cat:"هم‌زمانی",
+    desc:"اجرای چند کار به‌صورت هم‌زمان",
+    tools:[
+      ["ThreadPoolExecutor","اجرای هم‌زمان کارهای I/O","ThreadPoolExecutor(max_workers=None)","تعداد worker اختیاری","چند کار I/O را هم‌زمان اجرا می‌کند","Futureها"],
+      ["ProcessPoolExecutor","اجرای کارهای CPU","ProcessPoolExecutor(max_workers=None)","تعداد worker اختیاری","کارها را در processهای جدا اجرا می‌کند","Futureها"],
+      ["submit()","ارسال یک کار","executor.submit(fn, *args)","تابع + آرگومان‌ها","یک کار را برای اجرا می‌فرستد","Future"],
+      ["map()","اجرای تابع روی چند داده","executor.map(fn, iterable)","تابع + داده‌ها","تابع را روی چند ورودی اجرا می‌کند","نتایج"],
+      ["result()","دریافت نتیجه","future.result(timeout=None)","timeout اختیاری","نتیجه کار را دریافت می‌کند","مقدار تابع"],
+      ["as_completed()","دریافت کارهای تمام‌شده","as_completed(fs)","Futureها","Futureها را هنگام پایان دریافت می‌کند","iterator"]
+    ]
+  },
+
+  {
+    id:"hashlib", name:"hashlib", icon:"#", cat:"امنیت",
+    desc:"ساخت hash برای بررسی یکپارچگی و شناسه داده",
+    tools:[
+      ["sha256()","ساخت SHA-256","hashlib.sha256(data)","data به صورت bytes","hash 256 بیتی می‌سازد","hash object"],
+      ["sha512()","ساخت SHA-512","hashlib.sha512(data)","data به صورت bytes","hash قوی‌تر SHA می‌سازد","hash object"],
+      ["sha1()","ساخت SHA-1","hashlib.sha1(data)","data به صورت bytes","hash 160 بیتی می‌سازد","hash object"],
+      ["md5()","ساخت MD5","hashlib.md5(data)","bytes","hash قدیمی برای کاربردهای غیرامنیتی","hash object"],
+      ["hexdigest()","نمایش hash متنی","hash.hexdigest()","—","hash را به رشته hex تبدیل می‌کند","str"],
+      ["digest()","دریافت hash باینری","hash.digest()","—","خروجی خام hash را می‌دهد","bytes"],
+      ["update()","افزودن داده به hash","hash.update(data)","bytes","داده بیشتری به hash اضافه می‌کند","بدون خروجی"]
+    ]
+  },
+
+  {
+    id:"openpyxl", name:"openpyxl", icon:"▦", cat:"داده",
+    desc:"خواندن و ساخت فایل‌های Excel با فرمت xlsx",
+    tools:[
+      ["Workbook()","ساخت Excel جدید","Workbook()","—","یک workbook تازه می‌سازد","Workbook"],
+      ["load_workbook()","باز کردن Excel","load_workbook(filename)","filename","فایل xlsx را باز می‌کند","Workbook"],
+      ["active","انتخاب Sheet فعال","workbook.active","—","برگه فعال را برمی‌گرداند","Worksheet"],
+      ["cell()","دسترسی به سلول","sheet.cell(row, column)","row, column","یک سلول مشخص را انتخاب می‌کند","Cell"],
+      ["append()","افزودن ردیف","sheet.append(iterable)","لیست/iterable","یک ردیف اضافه می‌کند","بدون خروجی"],
+      ["save()","ذخیره Excel","workbook.save(filename)","filename","فایل را ذخیره می‌کند","xlsx"],
+      ["create_sheet()","ساخت Sheet","workbook.create_sheet(title)","title","یک برگه جدید می‌سازد","Worksheet"],
+      ["remove()","حذف Sheet","workbook.remove(worksheet)","worksheet","یک برگه را حذف می‌کند","بدون خروجی"],
+      ["max_row","تعداد ردیف‌ها","sheet.max_row","—","آخرین ردیف استفاده‌شده","int"],
+      ["max_column","تعداد ستون‌ها","sheet.max_column","—","آخرین ستون استفاده‌شده","int"]
+    ]
+  },
+
+  {
+    id:"pandas", name:"pandas", icon:"▤", cat:"داده",
+    desc:"پردازش و تحلیل داده‌های جدولی",
+    tools:[
+      ["read_csv()","خواندن CSV","pd.read_csv(path)","path + options","CSV را به DataFrame تبدیل می‌کند","DataFrame"],
+      ["read_excel()","خواندن Excel","pd.read_excel(path)","path + options","Excel را می‌خواند","DataFrame"],
+      ["DataFrame()","ساخت جدول داده","pd.DataFrame(data)","data","ساختار جدولی می‌سازد","DataFrame"],
+      ["head()","نمایش ردیف‌های اول","df.head(n=5)","n اختیاری","ابتدای جدول را نمایش می‌دهد","DataFrame"],
+      ["tail()","نمایش ردیف‌های آخر","df.tail(n=5)","n اختیاری","انتهای جدول را نمایش می‌دهد","DataFrame"],
+      ["drop()","حذف ردیف یا ستون","df.drop(labels, axis=0)","labels, axis","بخش‌هایی از جدول را حذف می‌کند","DataFrame"],
+      ["sort_values()","مرتب‌سازی","df.sort_values(by)","by + options","داده را مرتب می‌کند","DataFrame"],
+      ["groupby()","گروه‌بندی داده","df.groupby(by)","by","داده‌ها را گروه‌بندی می‌کند","GroupBy"],
+      ["describe()","خلاصه آماری","df.describe()","—","آمار توصیفی داده را می‌دهد","DataFrame"],
+      ["info()","اطلاعات DataFrame","df.info()","—","اطلاعات ستون‌ها و نوع داده را نمایش می‌دهد","بدون خروجی"],
+      ["to_csv()","ذخیره CSV","df.to_csv(path)","path + options","DataFrame را CSV می‌کند","CSV"],
+      ["to_excel()","ذخیره Excel","df.to_excel(path)","path + options","DataFrame را Excel می‌کند","xlsx"],
+      ["shape","ابعاد جدول","df.shape","—","تعداد ردیف و ستون را می‌دهد","tuple"],
+      ["columns","نام ستون‌ها","df.columns","—","نام ستون‌ها را برمی‌گرداند","Index"]
+    ]
+  },
+
+  {
+    id:"watchdog", name:"watchdog", icon:"◉", cat:"فایل",
+    desc:"نظارت بر تغییرات فایل‌ها و پوشه‌ها",
+    tools:[
+      ["Observer","ایجاد ناظر","Observer()","—","یک ناظر فایل ایجاد می‌کند","Observer"],
+      ["FileSystemEventHandler","تعریف واکنش","FileSystemEventHandler","—","رویدادهای فایل را مدیریت می‌کند","handler"],
+      ["schedule()","تعیین پوشه برای نظارت","observer.schedule(handler, path, recursive=False)","handler, path, recursive","مسیر را برای نظارت تعیین می‌کند","بدون خروجی"],
+      ["start()","شروع نظارت","observer.start()","—","نظارت را آغاز می‌کند","thread"],
+      ["stop()","توقف نظارت","observer.stop()","—","نظارت را متوقف می‌کند","بدون خروجی"],
+      ["join()","منتظر ماندن","observer.join()","—","تا پایان thread صبر می‌کند","بدون خروجی"],
+      ["on_created()","واکنش به ساخت","on_created(event)","event","هنگام ساخت فایل اجرا می‌شود","بدون خروجی"],
+      ["on_deleted()","واکنش به حذف","on_deleted(event)","event","هنگام حذف اجرا می‌شود","بدون خروجی"],
+      ["on_modified()","واکنش به تغییر","on_modified(event)","event","هنگام تغییر اجرا می‌شود","بدون خروجی"],
+      ["on_moved()","واکنش به جابه‌جایی","on_moved(event)","event","هنگام جابه‌جایی اجرا می‌شود","بدون خروجی"]
+    ]
+  },
+
+  {
+    id:"schedule", name:"schedule", icon:"◷", cat:"زمان",
+    desc:"اجرای خودکار کارها طبق زمان‌بندی",
+    tools:[
+      ["every()","تعیین فاصله","schedule.every(interval)","عدد فاصله","فاصله اجرای کار را تعیین می‌کند","Job"],
+      ["seconds","واحد ثانیه","schedule.every(10).seconds","—","زمان‌بندی بر اساس ثانیه","Job"],
+      ["minutes","واحد دقیقه","schedule.every(5).minutes","—","زمان‌بندی بر اساس دقیقه","Job"],
+      ["hours","واحد ساعت","schedule.every(2).hours","—","زمان‌بندی بر اساس ساعت","Job"],
+      ["days","واحد روز","schedule.every().day","—","زمان‌بندی روزانه","Job"],
+      ["weeks","واحد هفته","schedule.every().week","—","زمان‌بندی هفتگی","Job"],
+      ["do()","تعیین تابع","job.do(fn)","تابع + آرگومان‌ها","مشخص می‌کند چه کاری انجام شود","Job"],
+      ["run_pending()","اجرای کارهای موعدرسیده","schedule.run_pending()","—","Jobهای آماده را اجرا می‌کند","بدون خروجی"],
+      ["clear()","پاک کردن زمان‌بندی‌ها","schedule.clear()","tag اختیاری","Jobها را پاک می‌کند","بدون خروجی"],
+      ["cancel_job()","لغو یک Job","schedule.cancel_job(job)","job","یک زمان‌بندی را لغو می‌کند","بدون خروجی"]
+    ]
+  },
+
+  {
+    id:"send2trash", name:"Send2Trash", icon:"♻", cat:"فایل",
+    desc:"انتقال فایل به سطل زباله به‌جای حذف مستقیم",
+    tools:[
+      ["send2trash()","انتقال به Recycle Bin / Trash","send2trash(path)","path","فایل یا پوشه را به سطل زباله می‌فرستد","بدون خروجی"]
+    ]
+  },
+
+  {
+    id:"fnmatch", name:"fnmatch", icon:"✣", cat:"فایل",
+    desc:"تطبیق نام فایل‌ها با الگوهایی مثل *.txt",
+    tools:[
+      ["fnmatch()","تطبیق نام با الگو","fnmatch(name, pattern)","name, pattern","بررسی سازگاری نام با الگو","True / False"],
+      ["filter()","فیلتر کردن نام‌ها","filter(names, pattern)","names, pattern","نام‌های مطابق الگو را جدا می‌کند","list"],
+      ["translate()","تبدیل الگو به regex","translate(pattern)","pattern","الگو را به regex تبدیل می‌کند","str"]
+    ]
+  },
+
+  {
+    id:"filecmp", name:"filecmp", icon:"≋", cat:"فایل",
+    desc:"مقایسه فایل‌ها و پوشه‌ها",
+    tools:[
+      ["cmp()","مقایسه دو فایل","filecmp.cmp(f1, f2)","f1, f2","برابری محتوای دو فایل را بررسی می‌کند","True / False"],
+      ["cmpfiles()","مقایسه مجموعه فایل‌ها","filecmp.cmpfiles(dir1, dir2, common)","dir1, dir2, common","فایل‌های مشترک را مقایسه می‌کند","گزارش"],
+      ["dircmp()","مقایسه دو پوشه","filecmp.dircmp(a, b)","a, b","تفاوت ساختار دو پوشه را بررسی می‌کند","Dircmp"],
+      ["samefile()","بررسی یک فایل بودن","filecmp.cmp(f1, f2)","f1, f2","مقایسه فایل‌ها","True / False"]
+    ]
+  },
+
+  {
+    id:"tempfile", name:"tempfile", icon:"▧", cat:"فایل",
+    desc:"ساخت فایل‌ها و پوشه‌های موقت",
+    tools:[
+      ["TemporaryFile()","ساخت فایل موقت","tempfile.TemporaryFile()","options اختیاری","فایل موقت می‌سازد","file object"],
+      ["NamedTemporaryFile()","فایل موقت با نام","NamedTemporaryFile()","options","فایل موقت دارای نام ایجاد می‌کند","file object"],
+      ["TemporaryDirectory()","پوشه موقت","TemporaryDirectory()","options","پوشه موقت می‌سازد","directory path"],
+      ["gettempdir()","مسیر پوشه موقت","gettempdir()","—","محل پیش‌فرض فایل‌های موقت را می‌دهد","str"],
+      ["mkstemp()","ساخت فایل موقت","tempfile.mkstemp()","options","فایل موقت سطح پایین می‌سازد","fd, path"],
+      ["mkdtemp()","ساخت پوشه موقت","tempfile.mkdtemp()","options","پوشه موقت می‌سازد","path"]
+    ]
+  },
+
+  {
+    id:"stat", name:"stat", icon:"◫", cat:"فایل",
+    desc:"اطلاعات و ویژگی‌های فایل مانند اندازه و نوع",
+    tools:[
+      ["stat()","گرفتن اطلاعات فایل","os.stat(path)","path","metadata فایل را می‌گیرد","stat_result"],
+      ["S_ISREG()","بررسی فایل معمولی","stat.S_ISREG(mode)","mode","نوع فایل را بررسی می‌کند","True / False"],
+      ["S_ISDIR()","بررسی پوشه","stat.S_ISDIR(mode)","mode","تشخیص می‌دهد مسیر پوشه است","True / False"],
+      ["S_ISLINK()","بررسی symbolic link","stat.S_ISLNK(mode)","mode","بررسی لینک نمادین","True / False"],
+      ["ST_SIZE","اندازه فایل","stat.ST_SIZE","—","اندازه فایل را مشخص می‌کند","int"],
+      ["ST_MTIME","زمان تغییر","stat.ST_MTIME","—","زمان آخرین تغییر را نشان می‌دهد","timestamp"]
+    ]
+  },
+
+  {
+    id:"io", name:"io", icon:"↯", cat:"استاندارد",
+    desc:"کار با جریان‌های داده و خواندن و نوشتن در حافظه",
+    tools:[
+      ["StringIO()","جریان متنی در حافظه","io.StringIO(initial_value='')","متن اولیه اختیاری","مثل فایل متنی در RAM","stream"],
+      ["BytesIO()","جریان بایتی در حافظه","io.BytesIO(initial_bytes=b'')","bytes اختیاری","داده باینری را در RAM نگه می‌دارد","stream"],
+      ["read()","خواندن جریان","stream.read(size=-1)","size اختیاری","داده را می‌خواند","str / bytes"],
+      ["write()","نوشتن در جریان","stream.write(data)","data","داده را می‌نویسد","int"],
+      ["seek()","تغییر موقعیت","stream.seek(offset)","offset","مکان خواندن/نوشتن را تغییر می‌دهد","int"],
+      ["tell()","موقعیت فعلی","stream.tell()","—","موقعیت فعلی را می‌دهد","int"],
+      ["getvalue()","دریافت محتوای RAM","stream.getvalue()","—","کل داده ذخیره‌شده را می‌دهد","str / bytes"]
+    ]
+  },
+
+  {
+    id:"mimetypes", name:"mimetypes", icon:"⊙", cat:"فایل",
+    desc:"تشخیص نوع MIME فایل از روی پسوند",
+    tools:[
+      ["guess_type()","تشخیص نوع فایل","mimetypes.guess_type(url)","نام فایل/URL","نوع MIME احتمالی را حدس می‌زند","tuple"],
+      ["guess_extension()","حدس پسوند","mimetypes.guess_extension(type)","MIME type","پسوند مناسب MIME را برمی‌گرداند","str"],
+      ["init()","راه‌اندازی MIME types","mimetypes.init()","files اختیاری","جدول MIME را آماده می‌کند","بدون خروجی"],
+      ["types_map","دسترسی به جدول MIME","mimetypes.types_map","—","جدول پسوند و MIME را می‌دهد","dict"]
+    ]
+  },
+
+  {
+    id:"tarfile", name:"tarfile", icon:"▱", cat:"فایل",
+    desc:"ساخت و استخراج آرشیوهای tar",
+    tools:[
+      ["open()","باز کردن/ساخت آرشیو","tarfile.open(name, mode)","name, mode","آرشیو tar را باز یا ایجاد می‌کند","TarFile"],
+      ["add()","افزودن فایل","tar.add(name)","name","فایل یا پوشه را وارد آرشیو می‌کند","بدون خروجی"],
+      ["extractall()","استخراج آرشیو","tar.extractall(path)","path","محتویات آرشیو را استخراج می‌کند","فایل‌ها"],
+      ["getnames()","گرفتن نام‌ها","tar.getnames()","—","نام فایل‌های آرشیو را می‌دهد","list"],
+      ["getmembers()","گرفتن اعضا","tar.getmembers()","—","اطلاعات اعضای آرشیو را می‌دهد","list"],
+      ["close()","بستن آرشیو","tar.close()","—","آرشیو را می‌بندد","بدون خروجی"]
+    ]
+  },
+
+  {
+    id:"gzip / bz2 / lzma", name:"gzip / bz2 / lzma", icon:"≋", cat:"فشرده‌سازی",
+    desc:"فشرده‌سازی و استخراج با فرمت‌های مختلف",
+    tools:[
+      ["gzip.open()","خواندن/نوشتن gzip","gzip.open(filename, mode)","filename, mode","فایل gzip را باز می‌کند","file object"],
+      ["bz2.open()","کار با BZ2","bz2.open(filename, mode)","filename, mode","فایل bzip2 را باز می‌کند","file object"],
+      ["lzma.open()","کار با LZMA/XZ","lzma.open(filename, mode)","filename, mode","فایل xz/lzma را باز می‌کند","file object"],
+      ["gzip.compress()","فشرده‌سازی داده","gzip.compress(data)","bytes","داده را gzip می‌کند","bytes"],
+      ["gzip.decompress()","استخراج gzip","gzip.decompress(data)","bytes","داده gzip را باز می‌کند","bytes"]
+    ]
+  },
+
+  {
+    id:"requests", name:"requests", icon:"↯", cat:"وب",
+    desc:"ارسال درخواست HTTP و ارتباط با APIها",
+    tools:[
+      ["get()","ارسال GET","requests.get(url, params=None)","url, params و options","داده را از URL دریافت می‌کند","Response"],
+      ["post()","ارسال POST","requests.post(url, data=None, json=None)","url + data/json","داده را به سرور می‌فرستد","Response"],
+      ["put()","ارسال PUT","requests.put(url, data=None)","url + data","داده را به‌روزرسانی می‌کند","Response"],
+      ["delete()","ارسال DELETE","requests.delete(url)","url","درخواست حذف می‌فرستد","Response"],
+      ["status_code","کد وضعیت پاسخ","response.status_code","—","کد HTTP پاسخ را می‌خواند","int"],
+      ["json()","خواندن JSON","response.json()","—","JSON را به Python تبدیل می‌کند","dict/list"],
+      ["text","متن پاسخ","response.text","—","متن پاسخ HTTP را می‌دهد","str"],
+      ["headers","هدرهای پاسخ","response.headers","—","هدرهای HTTP را می‌دهد","dict"],
+      ["raise_for_status()","بررسی خطای HTTP","response.raise_for_status()","—","در صورت خطا exception ایجاد می‌کند","بدون خروجی"]
+    ]
+  },
+
+  {
+    id:"argparse", name:"argparse", icon:"›_", cat:"استاندارد",
+    desc:"ساخت ابزارهای خط فرمان و دریافت آرگومان‌ها",
+    tools:[
+      ["ArgumentParser()","ساخت parser","argparse.ArgumentParser()","description و options","مدیریت آرگومان‌ها را می‌سازد","ArgumentParser"],
+      ["add_argument()","تعریف آرگومان","parser.add_argument(name, ...)","نام + options","گزینه خط فرمان اضافه می‌کند","Action"],
+      ["parse_args()","خواندن آرگومان‌ها","parser.parse_args()","—","ورودی خط فرمان را پردازش می‌کند","Namespace"],
+      ["add_subparsers()","ساخت زیر‌دستور","parser.add_subparsers()","options","چند فرمان فرعی می‌سازد","Subparsers"],
+      ["set_defaults()","تنظیم مقدار پیش‌فرض","parser.set_defaults(**kwargs)","kwargs","مقدارهای پیش‌فرض تنظیم می‌کند","بدون خروجی"]
+    ]
+  },
+
+  {
+    id:"xml.etree.ElementTree", name:"ElementTree", icon:"◇", cat:"داده",
+    desc:"خواندن، ساخت و پردازش XML",
+    tools:[
+      ["parse()","خواندن XML از فایل","ET.parse(source)","source","فایل XML را parse می‌کند","ElementTree"],
+      ["fromstring()","خواندن XML از متن","ET.fromstring(text)","text","رشته XML را به درخت تبدیل می‌کند","Element"],
+      ["find()","پیدا کردن عنصر","root.find(match)","match","اولین عنصر مطابق را پیدا می‌کند","Element"],
+      ["findall()","پیدا کردن همه عناصر","root.findall(match)","match","همه عناصر مطابق را پیدا می‌کند","list"],
+      ["Element()","ساخت عنصر","ET.Element(tag)","tag","عنصر XML می‌سازد","Element"],
+      ["SubElement()","ساخت زیرعنصر","ET.SubElement(parent, tag)","parent, tag","عنصر فرزند می‌سازد","Element"],
+      ["tostring()","تبدیل XML به متن","ET.tostring(element)","element","درخت را به bytes تبدیل می‌کند","bytes"]
+    ]
+  },
+
+  {
+    id:"configparser", name:"configparser", icon:"⚙", cat:"تنظیمات",
+    desc:"خواندن و مدیریت فایل‌های تنظیمات INI",
+    tools:[
+      ["ConfigParser()","ساخت parser تنظیمات","configparser.ConfigParser()","—","parser برای INI می‌سازد","ConfigParser"],
+      ["read()","خواندن تنظیمات","config.read(filename)","filename","فایل INI را می‌خواند","list"],
+      ["get()","گرفتن مقدار","config.get(section, option)","section, option","مقدار گزینه را می‌خواند","str"],
+      ["set()","تنظیم مقدار","config.set(section, option, value)","section, option, value","مقدار گزینه را تغییر می‌دهد","بدون خروجی"],
+      ["sections()","گرفتن بخش‌ها","config.sections()","—","نام بخش‌ها را می‌دهد","list"],
+      ["has_section()","بررسی بخش","config.has_section(section)","section","وجود یک section را بررسی می‌کند","bool"],
+      ["has_option()","بررسی گزینه","config.has_option(section, option)","section, option","وجود گزینه را بررسی می‌کند","bool"]
+    ]
+  },
+
+  {
+    id:"time", name:"time", icon:"◷", cat:"زمان",
+    desc:"زمان، تأخیر و اندازه‌گیری مدت اجرای کد",
+    tools:[
+      ["time()","زمان فعلی Unix","time.time()","—","زمان فعلی را به ثانیه می‌دهد","float"],
+      ["sleep()","ایجاد تأخیر","time.sleep(seconds)","seconds","اجرای برنامه را متوقف می‌کند","بدون خروجی"],
+      ["perf_counter()","اندازه‌گیری دقیق زمان","time.perf_counter()","—","برای benchmark مناسب است","float"],
+      ["monotonic()","زمان یکنواخت","time.monotonic()","—","زمان یکنواخت برای اندازه‌گیری فاصله زمانی","float"],
+      ["ctime()","تبدیل timestamp","time.ctime(seconds)","seconds","زمان را به متن تبدیل می‌کند","str"],
+      ["strftime()","قالب‌بندی زمان","time.strftime(format)","format","زمان را با قالب دلخواه نمایش می‌دهد","str"]
+    ]
+  },
+
+  {
+    id:"sys / platform", name:"sys / platform", icon:"⌘", cat:"سیستم",
+    desc:"اطلاعات Python و سیستم‌عامل",
+    tools:[
+      ["sys.version","نسخه Python","sys.version","—","اطلاعات نسخه Python را می‌دهد","str"],
+      ["sys.argv","آرگومان‌های اجرا","sys.argv","—","لیست آرگومان‌های خط فرمان","list"],
+      ["sys.executable","مسیر Python","sys.executable","—","مسیر interpreter را می‌دهد","str"],
+      ["sys.platform","شناسه سیستم","sys.platform","—","شناسه سیستم‌عامل را می‌دهد","str"],
+      ["platform.system()","نام سیستم‌عامل","platform.system()","—","نام OS را برمی‌گرداند","str"],
+      ["platform.python_version()","نسخه Python","platform.python_version()","—","نسخه Python را می‌دهد","str"],
+      ["platform.machine()","معماری سیستم","platform.machine()","—","معماری CPU/OS را می‌دهد","str"],
+      ["platform.processor()","نام پردازنده","platform.processor()","—","اطلاعات processor را می‌دهد","str"]
+    ]
+  },
+
+  {
+    id:"threading / multiprocessing", name:"threading / multiprocessing", icon:"⚙", cat:"هم‌زمانی",
+    desc:"اجرای هم‌زمان کارها در thread و process",
+    tools:[
+      ["Thread()","ساخت thread","threading.Thread(target=fn)","target + args","thread جدید می‌سازد","Thread"],
+      ["start()","شروع thread","thread.start()","—","اجرای thread را آغاز می‌کند","بدون خروجی"],
+      ["join()","انتظار برای پایان","thread.join()","timeout اختیاری","منتظر پایان thread می‌ماند","بدون خروجی"],
+      ["is_alive()","بررسی فعال بودن","thread.is_alive()","—","فعال بودن thread را بررسی می‌کند","bool"],
+      ["Process()","ساخت process","multiprocessing.Process(target=fn)","target + args","process جدا ایجاد می‌کند","Process"],
+      ["Queue()","صف ارتباطی","multiprocessing.Queue()","—","صف برای ارتباط processها می‌سازد","Queue"],
+      ["current_thread()","thread فعلی","threading.current_thread()","—","thread فعلی را برمی‌گرداند","Thread"]
+    ]
+  },
+
+  {
+    id:"sqlite3", name:"sqlite3", icon:"▣", cat:"داده",
+    desc:"کار با SQLite بدون نیاز به سرور",
+    tools:[
+      ["connect()","اتصال به دیتابیس","sqlite3.connect(database)","database","اتصال SQLite ایجاد می‌کند","Connection"],
+      ["cursor()","ساخت cursor","connection.cursor()","—","برای اجرای SQL استفاده می‌شود","Cursor"],
+      ["execute()","اجرای SQL","cursor.execute(sql, params)","SQL + params","دستور SQL اجرا می‌کند","Cursor"],
+      ["executemany()","اجرای چندباره SQL","cursor.executemany(sql, seq)","SQL + sequence","دستور را برای چند داده اجرا می‌کند","Cursor"],
+      ["fetchone()","گرفتن یک نتیجه","cursor.fetchone()","—","یک ردیف نتیجه را می‌گیرد","tuple"],
+      ["fetchall()","گرفتن همه نتایج","cursor.fetchall()","—","تمام ردیف‌ها را می‌گیرد","list"],
+      ["commit()","ثبت تغییرات","connection.commit()","—","تغییرات را ذخیره می‌کند","بدون خروجی"],
+      ["rollback()","برگرداندن تغییرات","connection.rollback()","—","تغییرات ثبت‌نشده را برمی‌گرداند","بدون خروجی"],
+      ["close()","بستن اتصال","connection.close()","—","اتصال را می‌بندد","بدون خروجی"]
+    ]
+  },
+
+  {
+    id:"PDF tools", name:"PDF tools", icon:"▤", cat:"اسناد",
+    desc:"خواندن، ویرایش، تبدیل و پردازش PDF",
+    tools:[
+      ["PdfReader","خواندن PDF","PdfReader(filename)","filename","PDF را باز می‌کند","Reader"],
+      ["PdfWriter","ساخت/ویرایش PDF","PdfWriter()","—","برای ایجاد خروجی PDF استفاده می‌شود","Writer"],
+      ["fitz.open()","باز کردن PDF با PyMuPDF","fitz.open(filename)","filename","PDF را برای پردازش باز می‌کند","Document"],
+      ["convert_from_path()","تبدیل PDF به تصویر","convert_from_path(pdf_path)","path + options","صفحات PDF را به تصویر تبدیل می‌کند","images"],
+      ["extract_text()","استخراج متن PDF","page.extract_text()","—","متن صفحه را استخراج می‌کند","str"],
+      ["merge_page()","ادغام صفحات","page.merge_page(other)","other page","دو صفحه را روی هم قرار می‌دهد","Page"]
+    ]
+  },
+
+  {
+    id:"python-docx", name:"python-docx", icon:"W", cat:"اسناد",
+    desc:"ساخت و ویرایش فایل‌های Word",
+    tools:[
+      ["Document()","ساخت Word","Document()","—","سند Word جدید می‌سازد","Document"],
+      ["add_paragraph()","افزودن پاراگراف","document.add_paragraph(text)","text اختیاری","پاراگراف اضافه می‌کند","Paragraph"],
+      ["add_heading()","افزودن عنوان","document.add_heading(text, level)","text, level","عنوان اضافه می‌کند","Paragraph"],
+      ["add_table()","ساخت جدول","document.add_table(rows, cols)","rows, cols","جدول ایجاد می‌کند","Table"],
+      ["add_page_break()","شکستن صفحه","document.add_page_break()","—","صفحه جدید ایجاد می‌کند","Paragraph"],
+      ["save()","ذخیره Word","document.save(path)","path","سند را ذخیره می‌کند","docx"],
+      ["add_picture()","افزودن تصویر","document.add_picture(path)","path","تصویر به Word اضافه می‌کند","InlineShape"]
+    ]
+  },
+
+  {
+    id:"python-pptx", name:"python-pptx", icon:"P", cat:"اسناد",
+    desc:"ساخت و ویرایش PowerPoint",
+    tools:[
+      ["Presentation()","ساخت ارائه","Presentation()","template اختیاری","ارائه PowerPoint می‌سازد","Presentation"],
+      ["add_slide()","افزودن اسلاید","prs.slides.add_slide(layout)","layout","یک اسلاید اضافه می‌کند","Slide"],
+      ["add_textbox()","افزودن کادر متن","slide.shapes.add_textbox(...)","مختصات + اندازه","کادر متنی ایجاد می‌کند","Shape"],
+      ["add_picture()","افزودن تصویر","slide.shapes.add_picture(path, ...)","path + مختصات","تصویر اضافه می‌کند","Picture"],
+      ["slide_layouts","قالب‌های اسلاید","prs.slide_layouts","—","قالب‌های موجود را می‌دهد","Layouts"],
+      ["save()","ذخیره PowerPoint","prs.save(path)","path","فایل pptx را ذخیره می‌کند","pptx"]
+    ]
+  },
+
+  {
+    id:"watchfiles", name:"watchfiles", icon:"◉", cat:"فایل",
+    desc:"راه ساده برای شناسایی تغییرات فایل‌ها و پوشه‌ها",
+    tools:[
+      ["watch()","نظارت بر تغییرات","watch(path)","path + options","تغییرات فایل‌ها را دنبال می‌کند","changes"],
+      ["Change.added","فایل ایجاد شده","Change.added","—","نوع تغییر ایجاد فایل","enum"],
+      ["Change.modified","فایل تغییر کرده","Change.modified","—","نوع تغییر ویرایش فایل","enum"],
+      ["Change.deleted","فایل حذف شده","Change.deleted","—","نوع تغییر حذف فایل","enum"]
+    ]
+  },
+
+  {
+    id:"APScheduler", name:"APScheduler", icon:"◷", cat:"زمان",
+    desc:"زمان‌بندی پیشرفته‌ی کارهای خودکار",
+    tools:[
+      ["BackgroundScheduler()","ساخت scheduler","BackgroundScheduler()","options","زمان‌بند پس‌زمینه می‌سازد","Scheduler"],
+      ["add_job()","افزودن کار","scheduler.add_job(func, trigger, ...)","تابع + trigger + options","یک job را زمان‌بندی می‌کند","Job"],
+      ["start()","شروع scheduler","scheduler.start()","—","زمان‌بند را فعال می‌کند","بدون خروجی"],
+      ["pause()","توقف موقت","scheduler.pause()","—","اجرای jobها را موقتاً متوقف می‌کند","بدون خروجی"],
+      ["resume()","ادامه scheduler","scheduler.resume()","—","scheduler را ادامه می‌دهد","بدون خروجی"],
+      ["shutdown()","خاموش کردن","scheduler.shutdown()","wait=True","scheduler را متوقف می‌کند","بدون خروجی"],
+      ["get_jobs()","لیست jobها","scheduler.get_jobs()","—","jobهای فعال را می‌دهد","list"]
+    ]
+  },
+
+  {
+    id:"httpx", name:"httpx", icon:"↯", cat:"وب",
+    desc:"درخواست HTTP مدرن به شکل همگام و غیرهمگام",
+    tools:[
+      ["get()","GET همگام","httpx.get(url)","url + options","درخواست GET می‌فرستد","Response"],
+      ["post()","POST همگام","httpx.post(url)","url + options","درخواست POST می‌فرستد","Response"],
+      ["Client()","کلاینت HTTP","httpx.Client()","options","اتصالات مشترک را مدیریت می‌کند","Client"],
+      ["AsyncClient()","کلاینت async","httpx.AsyncClient()","options","درخواست asynchronous را مدیریت می‌کند","AsyncClient"],
+      ["request()","ارسال درخواست عمومی","client.request(method, url)","method, url","درخواست HTTP عمومی می‌فرستد","Response"],
+      ["aclose()","بستن کلاینت async","await client.aclose()","—","منابع کلاینت را آزاد می‌کند","بدون خروجی"],
+      ["status_code","کد وضعیت","response.status_code","—","کد HTTP را می‌خواند","int"]
+    ]
+  },
+
+  {
+    id:"filelock", name:"filelock", icon:"🔒", cat:"فایل",
+    desc:"جلوگیری از دسترسی هم‌زمان چند برنامه به یک فایل",
+    tools:[
+      ["FileLock()","ساخت قفل فایل","FileLock(lock_file)","مسیر فایل قفل","قفل فایل ایجاد می‌کند","FileLock"],
+      ["acquire()","گرفتن قفل","lock.acquire(timeout=-1)","timeout اختیاری","تا گرفتن قفل صبر می‌کند","Lock"],
+      ["release()","آزاد کردن قفل","lock.release()","—","قفل را آزاد می‌کند","بدون خروجی"],
+      ["is_locked","بررسی قفل","lock.is_locked","—","بررسی می‌کند قفل فعال است","bool"],
+      ["is_single_instance","قفل تک‌نمونه","lock.is_single_instance","—","وضعیت تک‌نمونه را بررسی می‌کند","bool"]
+    ]
+  }
 ];
 
-/* ابزارهای تکمیلی */
-const EXTRA_TOOLS = {
+/* =========================================================
+   STATE
+   ========================================================= */
 
-"os":[
-["chdir()","تغییر پوشه‌ی فعلی","os.chdir(path)","path","مسیر کاری برنامه را تغییر می‌دهد","بدون خروجی"],
-["getenv()","خواندن متغیر محیطی","os.getenv(key, default=None)","key, default","مقدار یک environment variable را می‌خواند","str / None"],
-["putenv()","تنظیم متغیر محیطی","os.putenv(key, value)","key, value","یک متغیر محیطی را تنظیم می‌کند","بدون خروجی"],
-["environ","دسترسی به متغیرهای محیطی","os.environ","—","مجموعه متغیرهای محیطی را در اختیار می‌گذارد","mapping"],
-["walk()","پیمایش بازگشتی پوشه‌ها","os.walk(top)","top","فایل‌ها و پوشه‌های زیرشاخه را پیمایش می‌کند","iterator"],
-["scandir()","خواندن سریع محتویات پوشه","os.scandir(path)","path","ورودی‌های یک پوشه را به شکل DirEntry می‌دهد","iterator"],
-["rmdir()","حذف پوشه‌ی خالی","os.rmdir(path)","path","یک پوشه‌ی خالی را حذف می‌کند","بدون خروجی"],
-["replace()","جایگزینی فایل یا مسیر","os.replace(src, dst)","src, dst","مسیر مقصد را با منبع جایگزین می‌کند","بدون خروجی"],
-["system()","اجرای فرمان سیستم","os.system(command)","command","یک فرمان را در shell اجرا می‌کند","کد بازگشت"],
-["cpu_count()","تعداد هسته‌های پردازشی","os.cpu_count()","—","تعداد پردازنده‌های منطقی را می‌دهد","int"],
-["urandom()","تولید داده تصادفی امن","os.urandom(n)","n","تعداد مشخصی بایت تصادفی تولید می‌کند","bytes"]
-],
-
-"pathlib":[
-["name","نام فایل/پوشه","Path(path).name","—","آخرین بخش مسیر را می‌دهد","str"],
-["stem","نام بدون پسوند","Path(path).stem","—","نام فایل را بدون پسوند برمی‌گرداند","str"],
-["suffix","پسوند فایل","Path(path).suffix","—","پسوند آخر فایل را می‌دهد","str"],
-["suffixes","همه پسوندها","Path(path).suffixes","—","فهرست پسوندهای مسیر را می‌دهد","list"],
-["parent","پوشه‌ی والد","Path(path).parent","—","پوشه‌ی بالاتر مسیر را می‌دهد","Path"],
-["parents","والدهای مسیر","Path(path).parents","—","همه والدهای مسیر را در اختیار می‌گذارد","sequence"],
-["is_file()","تشخیص فایل","Path(path).is_file()","—","بررسی می‌کند مسیر یک فایل معمولی است یا نه","True / False"],
-["is_dir()","تشخیص پوشه","Path(path).is_dir()","—","بررسی می‌کند مسیر یک پوشه است یا نه","True / False"],
-["iterdir()","پیمایش محتویات پوشه","Path(path).iterdir()","—","محتویات مستقیم پوشه را پیمایش می‌کند","iterator"],
-["rglob()","جستجوی بازگشتی با الگو","Path(path).rglob(pattern)","pattern","فایل‌های مطابق الگو را در زیرپوشه‌ها پیدا می‌کند","iterator"],
-["mkdir()","ساخت پوشه","Path(path).mkdir(parents=False, exist_ok=False)","parents, exist_ok","پوشه را می‌سازد","بدون خروجی"],
-["unlink()","حذف فایل","Path(path).unlink()","—","فایل را حذف می‌کند","بدون خروجی"],
-["rename()","تغییر نام مسیر","Path(path).rename(target)","target","نام یا مسیر را تغییر می‌دهد","Path"],
-["read_bytes()","خواندن بایت‌ها","Path(path).read_bytes()","—","محتوای فایل را به صورت bytes می‌خواند","bytes"],
-["write_bytes()","نوشتن بایت‌ها","Path(path).write_bytes(data)","data","داده باینری را ذخیره می‌کند","تعداد بایت"]
-],
-
-"shutil":[
-["copy2()","کپی همراه metadata","shutil.copy2(src, dst)","src, dst","فایل را همراه metadata کپی می‌کند","مسیر مقصد"],
-["copyfile()","کپی فقط محتوا","shutil.copyfile(src, dst)","src, dst","محتوای یک فایل را در فایل دیگر می‌نویسد","مسیر مقصد"],
-["copymode()","کپی مجوزها","shutil.copymode(src, dst)","src, dst","permissionهای فایل را کپی می‌کند","بدون خروجی"],
-["copystat()","کپی metadata","shutil.copystat(src, dst)","src, dst","اطلاعات stat را منتقل می‌کند","بدون خروجی"],
-["ignore_patterns()","ساخت الگوی نادیده‌گیری","shutil.ignore_patterns(*patterns)","patterns","فایل‌های مطابق الگو را هنگام کپی نادیده می‌گیرد","callable"],
-["make_archive()","ساخت آرشیو","shutil.make_archive(base_name, format, root_dir)","نام، فرمت، پوشه","از یک پوشه آرشیو می‌سازد","مسیر آرشیو"],
-["unpack_archive()","استخراج آرشیو","shutil.unpack_archive(filename, extract_dir)","filename, extract_dir","آرشیو را استخراج می‌کند","بدون خروجی"],
-["which()","پیدا کردن برنامه","shutil.which(cmd)","cmd","مسیر اجرایی یک فرمان را پیدا می‌کند","str / None"],
-["get_terminal_size()","اندازه ترمینال","shutil.get_terminal_size()","options اختیاری","ابعاد ترمینال را می‌دهد","terminal size"],
-["chown()","تغییر مالک فایل","shutil.chown(path, user=None, group=None)","path + options","مالک یا گروه فایل را تغییر می‌دهد","بدون خروجی"]
-],
-
-"concurrent.futures":[
-["as_completed()","دریافت Futureهای تمام‌شده","as_completed(fs)","iterable of Future","Futureها را هنگام اتمام تحویل می‌دهد","iterator"],
-["wait()","انتظار برای Futureها","wait(fs, timeout=None)","fs, timeout","برای پایان یا شرط مشخص صبر می‌کند","DoneAndNotDone"],
-["Future","نماینده‌ی کار آینده","Future()","—","وضعیت یک کار غیرهم‌زمان را نگه می‌دارد","Future"],
-["done()","بررسی پایان کار","future.done()","—","بررسی می‌کند Future تمام شده یا نه","True / False"],
-["cancel()","لغو کار","future.cancel()","—","اگر هنوز شروع نشده باشد آن را لغو می‌کند","True / False"],
-["cancelled()","بررسی لغو شدن","future.cancelled()","—","وضعیت لغو Future را می‌سنجد","True / False"],
-["exception()","گرفتن خطای کار","future.exception()","timeout اختیاری","استثنای رخ‌داده را می‌دهد","Exception / None"],
-["shutdown()","بستن Executor","executor.shutdown(wait=True)","wait","Executor را پس از کارها می‌بندد","بدون خروجی"],
-["__enter__()","ورود به context manager","executor.__enter__()","—","برای استفاده با with آماده می‌شود","Executor"],
-["__exit__()","خروج از context manager","executor.__exit__(...)","—","منابع Executor را آزاد می‌کند","بدون خروجی"]
-],
-
-"hashlib":[
-["sha1()","ساخت SHA-1","hashlib.sha1(data)","bytes","یک digest از نوع SHA-1 می‌سازد","hash object"],
-["sha384()","ساخت SHA-384","hashlib.sha384(data)","bytes","یک hash با طول 384 بیت می‌سازد","hash object"],
-["sha512()","ساخت SHA-512","hashlib.sha512(data)","bytes","یک hash با طول 512 بیت می‌سازد","hash object"],
-["blake2b()","ساخت BLAKE2b","hashlib.blake2b(data)","bytes","hash سریع BLAKE2b تولید می‌کند","hash object"],
-["blake2s()","ساخت BLAKE2s","hashlib.blake2s(data)","bytes","نسخه کوچک‌تر BLAKE2 را می‌سازد","hash object"],
-["update()","افزودن داده به hash","hash.update(data)","bytes","داده جدید را وارد محاسبه hash می‌کند","بدون خروجی"],
-["digest()","گرفتن digest باینری","hash.digest()","—","نتیجه hash را به صورت bytes می‌دهد","bytes"],
-["copy()","کپی hash object","hash.copy()","—","یک نسخه مستقل از وضعیت فعلی hash می‌سازد","hash object"],
-["name","نام الگوریتم","hash.name","—","نام الگوریتم hash را می‌دهد","str"],
-["digest_size","اندازه digest","hash.digest_size","—","تعداد بایت‌های digest را می‌دهد","int"],
-["algorithms_available","الگوریتم‌های موجود","hashlib.algorithms_available","—","نام الگوریتم‌های قابل استفاده را می‌دهد","set"]
-],
-
-"openpyxl":[
-["create_sheet()","ساخت Sheet جدید","workbook.create_sheet(title)","title اختیاری","یک برگه جدید ایجاد می‌کند","Worksheet"],
-["remove()","حذف Sheet","workbook.remove(worksheet)","worksheet","یک برگه را حذف می‌کند","بدون خروجی"],
-["sheetnames","نام Sheetها","workbook.sheetnames","—","نام تمام برگه‌ها را می‌دهد","list"],
-["title","نام‌گذاری Sheet","sheet.title","title","نام برگه را می‌خواند یا تغییر می‌دهد","str"],
-["max_row","تعداد ردیف‌ها","sheet.max_row","—","آخرین ردیف دارای داده را مشخص می‌کند","int"],
-["max_column","تعداد ستون‌ها","sheet.max_column","—","آخرین ستون دارای داده را مشخص می‌کند","int"],
-["iter_rows()","پیمایش ردیف‌ها","sheet.iter_rows(min_row=1, max_row=10)","range اختیاری","سلول‌ها را ردیف‌به‌ردیف پیمایش می‌کند","iterator"],
-["iter_cols()","پیمایش ستون‌ها","sheet.iter_cols(min_col=1, max_col=5)","range اختیاری","سلول‌ها را ستون‌به‌ستون پیمایش می‌کند","iterator"],
-["delete_rows()","حذف ردیف","sheet.delete_rows(idx, amount=1)","idx, amount","ردیف‌ها را حذف می‌کند","بدون خروجی"],
-["insert_rows()","درج ردیف","sheet.insert_rows(idx, amount=1)","idx, amount","ردیف جدید اضافه می‌کند","بدون خروجی"],
-["delete_cols()","حذف ستون","sheet.delete_cols(idx, amount=1)","idx, amount","ستون‌ها را حذف می‌کند","بدون خروجی"],
-["insert_cols()","درج ستون","sheet.insert_cols(idx, amount=1)","idx, amount","ستون جدید اضافه می‌کند","بدون خروجی"],
-["freeze_panes","ثابت کردن ردیف‌ها","sheet.freeze_panes = 'A2'","cell reference","بخش مشخصی از Sheet هنگام اسکرول ثابت می‌ماند","بدون خروجی"],
-["merge_cells()","ادغام سلول‌ها","sheet.merge_cells(range_string)","range_string","چند سلول را ادغام می‌کند","بدون خروجی"],
-["unmerge_cells()","لغو ادغام سلول‌ها","sheet.unmerge_cells(range_string)","range_string","ادغام یک محدوده را برمی‌دارد","بدون خروجی"],
-["Font()","تنظیم فونت سلول","Font(name, size, bold=False)","options","ظاهر متن سلول را تنظیم می‌کند","Font"],
-["PatternFill()","رنگ پس‌زمینه سلول","PatternFill(fill_type, fgColor)","options","پس‌زمینه سلول را تنظیم می‌کند","Fill"],
-["Alignment()","تراز سلول","Alignment(horizontal, vertical)","options","تراز افقی و عمودی را تنظیم می‌کند","Alignment"]
-],
-
-"pandas":[
-["tail()","نمایش چند ردیف آخر","df.tail(n=5)","n اختیاری","انتهای جدول را نمایش می‌دهد","DataFrame"],
-["info()","خلاصه ساختار داده","df.info()","—","نوع ستون‌ها و تعداد مقادیر را گزارش می‌کند","None"],
-["describe()","آمار توصیفی","df.describe()","options","آمار عددی ستون‌ها را می‌دهد","DataFrame"],
-["shape","ابعاد جدول","df.shape","—","تعداد ردیف و ستون را می‌دهد","tuple"],
-["columns","نام ستون‌ها","df.columns","—","برچسب ستون‌ها را برمی‌گرداند","Index"],
-["index","شاخص ردیف‌ها","df.index","—","index جدول را می‌دهد","Index"],
-["loc[]","انتخاب بر اساس برچسب","df.loc[row, column]","row, column","داده را با label انتخاب می‌کند","Series / DataFrame"],
-["iloc[]","انتخاب بر اساس موقعیت","df.iloc[row, column]","row, column","داده را با شماره موقعیت انتخاب می‌کند","Series / DataFrame"],
-["query()","فیلتر با شرط","df.query(expr)","expr","ردیف‌های مطابق شرط را انتخاب می‌کند","DataFrame"],
-["groupby()","گروه‌بندی داده‌ها","df.groupby(by)","by","داده‌ها را بر اساس یک یا چند ستون گروه‌بندی می‌کند","GroupBy"],
-["value_counts()","شمارش مقادیر","df['column'].value_counts()","column","تعداد تکرار هر مقدار را می‌شمارد","Series"],
-["dropna()","حذف مقادیر خالی","df.dropna()","options","ردیف/ستون‌های دارای NaN را حذف می‌کند","DataFrame"],
-["fillna()","جایگزینی مقادیر خالی","df.fillna(value)","value","مقادیر خالی را با مقدار مشخص پر می‌کند","DataFrame"],
-["isna()","تشخیص مقدار خالی","df.isna()","—","خانه‌های خالی را مشخص می‌کند","DataFrame"],
-["duplicated()","تشخیص رکورد تکراری","df.duplicated()","options","ردیف‌های تکراری را مشخص می‌کند","Series"],
-["drop_duplicates()","حذف رکوردهای تکراری","df.drop_duplicates()","options","رکوردهای تکراری را حذف می‌کند","DataFrame"],
-["rename()","تغییر نام ستون‌ها","df.rename(columns=mapping)","mapping","برچسب ستون‌ها یا index را تغییر می‌دهد","DataFrame"],
-["merge()","ترکیب دو جدول","pd.merge(left, right, on='id')","دو DataFrame + key","دو جدول را بر اساس کلید ترکیب می‌کند","DataFrame"],
-["concat()","چسباندن جدول‌ها","pd.concat(objs)","لیست DataFrameها","چند جدول را به هم متصل می‌کند","DataFrame"],
-["to_json()","ذخیره به JSON","df.to_json(path)","path + options","DataFrame را به JSON تبدیل می‌کند","JSON file"]
-],
-
-"watchdog":[
-["on_created()","واکنش به ایجاد فایل","handler.on_created(event)","event","هنگام ایجاد فایل/پوشه اجرا می‌شود","event"],
-["on_modified()","واکنش به تغییر فایل","handler.on_modified(event)","event","هنگام تغییر فایل اجرا می‌شود","event"],
-["on_deleted()","واکنش به حذف","handler.on_deleted(event)","event","هنگام حذف فایل اجرا می‌شود","event"],
-["on_moved()","واکنش به جابه‌جایی","handler.on_moved(event)","event","هنگام تغییر مسیر فایل اجرا می‌شود","event"],
-["is_directory","تشخیص رویداد پوشه","event.is_directory","—","مشخص می‌کند رویداد مربوط به پوشه است یا فایل","bool"],
-["src_path","مسیر منبع رویداد","event.src_path","—","مسیر آیتم تغییرکرده را می‌دهد","str"],
-["dest_path","مسیر مقصد رویداد","event.dest_path","—","در رویداد move مسیر مقصد را می‌دهد","str"],
-["schedule()","اتصال handler به مسیر","observer.schedule(handler, path, recursive=True)","handler, path, recursive","نظارت را روی مسیر تنظیم می‌کند","بدون خروجی"],
-["start()","شروع thread ناظر","observer.start()","—","نظارت را آغاز می‌کند","thread"],
-["stop()","درخواست توقف","observer.stop()","—","نظارت را متوقف می‌کند","بدون خروجی"],
-["join()","صبر تا پایان","observer.join(timeout=None)","timeout اختیاری","تا پایان thread منتظر می‌ماند","بدون خروجی"],
-["is_alive()","بررسی فعال بودن ناظر","observer.is_alive()","—","فعال بودن thread را بررسی می‌کند","bool"]
-],
-
-"schedule":[
-["weeks","واحد هفته","schedule.every(1).weeks","—","زمان‌بندی هفتگی ایجاد می‌کند","Job"],
-["monday","روز دوشنبه","schedule.every().monday","—","اجرای job در دوشنبه","Job"],
-["tuesday","روز سه‌شنبه","schedule.every().tuesday","—","اجرای job در سه‌شنبه","Job"],
-["wednesday","روز چهارشنبه","schedule.every().wednesday","—","اجرای job در چهارشنبه","Job"],
-["thursday","روز پنج‌شنبه","schedule.every().thursday","—","اجرای job در پنج‌شنبه","Job"],
-["friday","روز جمعه","schedule.every().friday","—","اجرای job در جمعه","Job"],
-["saturday","روز شنبه","schedule.every().saturday","—","اجرای job در شنبه","Job"],
-["at()","تعیین ساعت اجرا","job.at('10:30')","زمان","زمان دقیق اجرای job را تعیین می‌کند","Job"],
-["until()","تعیین زمان پایان","job.until('18:00')","زمان/تاریخ","زمان‌بندی را تا زمان مشخص ادامه می‌دهد","Job"],
-["cancel_job()","لغو یک job","schedule.cancel_job(job)","job","job مشخص را لغو می‌کند","بدون خروجی"],
-["clear()","پاک کردن jobها","schedule.clear(tag=None)","tag اختیاری","jobهای زمان‌بندی‌شده را پاک می‌کند","بدون خروجی"],
-["get_jobs()","دریافت jobها","schedule.get_jobs(tag=None)","tag اختیاری","فهرست jobهای ثبت‌شده را می‌دهد","list"],
-["run_all()","اجرای همه jobها","schedule.run_all(delay_seconds=0)","delay اختیاری","تمام jobها را اجرا می‌کند","بدون خروجی"]
-],
-
-"send2trash":[
-["send2trash()","انتقال فایل به سطل زباله","send2trash(path)","path","فایل یا پوشه را بدون حذف دائمی به Trash می‌فرستد","بدون خروجی"]
-],
-
-"fnmatch":[
-["fnmatchcase()","تطبیق حساس به حروف","fnmatchcase(name, pattern)","name, pattern","مطابقت را بدون نادیده‌گرفتن case انجام می‌دهد","bool"],
-["translate()","تبدیل الگو به regex","translate(pattern)","pattern","الگوی shell را به عبارت منظم تبدیل می‌کند","str"],
-["filter()","فیلتر نام‌ها","filter(names, pattern)","names, pattern","نام‌های مطابق الگو را جدا می‌کند","list"]
-],
-
-"filecmp":[
-["clear_cache()","پاک کردن cache مقایسه","filecmp.clear_cache()","—","cache نتایج مقایسه را پاک می‌کند","بدون خروجی"],
-["dircmp.left","مسیر پوشه اول","comparison.left","—","مسیر طرف اول مقایسه را می‌دهد","str"],
-["dircmp.right","مسیر پوشه دوم","comparison.right","—","مسیر طرف دوم مقایسه را می‌دهد","str"],
-["dircmp.common","موارد مشترک","comparison.common","—","نام‌های مشترک دو پوشه را می‌دهد","list"],
-["dircmp.left_only","فقط در پوشه اول","comparison.left_only","—","مواردی که فقط در سمت چپ هستند","list"],
-["dircmp.right_only","فقط در پوشه دوم","comparison.right_only","—","مواردی که فقط در سمت راست هستند","list"],
-["dircmp.same_files","فایل‌های یکسان","comparison.same_files","—","فایل‌های مشترک و یکسان را می‌دهد","list"],
-["dircmp.diff_files","فایل‌های متفاوت","comparison.diff_files","—","فایل‌های مشترک اما متفاوت را می‌دهد","list"]
-],
-
-"tempfile":[
-["TemporaryFile()","ساخت فایل موقت","tempfile.TemporaryFile(mode='w+')","mode + options","فایل موقت را باز می‌کند","file object"],
-["NamedTemporaryFile()","ساخت فایل موقت نام‌دار","tempfile.NamedTemporaryFile(suffix=None)","suffix + options","فایل موقتی با نام قابل مشاهده می‌سازد","file object"],
-["SpooledTemporaryFile()","فایل موقت با buffer","tempfile.SpooledTemporaryFile(max_size=...)","max_size + options","تا حد مشخصی داده را در حافظه نگه می‌دارد","file object"],
-["TemporaryDirectory()","ساخت پوشه موقت","tempfile.TemporaryDirectory()","options","پوشه موقت می‌سازد و مدیریت پاک‌سازی دارد","directory path"],
-["mkstemp()","ساخت فایل موقت سطح پایین","tempfile.mkstemp(suffix=None)","options","descriptor و مسیر فایل موقت می‌سازد","fd, path"],
-["mkdtemp()","ساخت پوشه موقت سطح پایین","tempfile.mkdtemp(suffix=None)","options","یک پوشه موقت ایجاد می‌کند","path"],
-["gettempdir()","پوشه موقت سیستم","tempfile.gettempdir()","—","مسیر پیش‌فرض temp را می‌دهد","str"],
-["gettempprefix()","پیشوند فایل موقت","tempfile.gettempprefix()","—","پیشوند نام فایل‌های موقت را می‌دهد","str"]
-],
-
-"stat":[
-["S_ISLNK()","تشخیص symbolic link","stat.S_ISLNK(mode)","mode","بررسی می‌کند مسیر لینک نمادین است یا نه","bool"],
-["S_ISSOCK()","تشخیص socket","stat.S_ISSOCK(mode)","mode","نوع socket را بررسی می‌کند","bool"],
-["S_ISCHR()","تشخیص character device","stat.S_ISCHR(mode)","mode","نوع character device را بررسی می‌کند","bool"],
-["S_ISBLK()","تشخیص block device","stat.S_ISBLK(mode)","mode","نوع block device را بررسی می‌کند","bool"],
-["S_ISFIFO()","تشخیص FIFO","stat.S_ISFIFO(mode)","mode","نوع named pipe را بررسی می‌کند","bool"],
-["ST_SIZE","اندازه فایل","stat.ST_SIZE","stat_result","اندازه فایل را از metadata می‌گیرد","int"],
-["ST_MTIME","زمان آخرین تغییر","stat.ST_MTIME","stat_result","زمان تغییر فایل را به timestamp می‌دهد","float"],
-["ST_CTIME","زمان ایجاد/metadata","stat.ST_CTIME","stat_result","زمان وابسته به سیستم‌عامل را می‌دهد","float"],
-["ST_MODE","mode فایل","stat.ST_MODE","stat_result","اطلاعات نوع و مجوزهای فایل را نگه می‌دارد","int"],
-["filemode()","تبدیل mode به متن","stat.filemode(mode)","mode","مجوزها را شبیه ls -l نمایش می‌دهد","str"]
-],
-
-"io":[
-["seek()","جابجایی مکان جریان","stream.seek(offset)","offset + whence","مکان خواندن/نوشتن را تغییر می‌دهد","position"],
-["tell()","گرفتن مکان فعلی","stream.tell()","—","مکان فعلی جریان را می‌دهد","int"],
-["readline()","خواندن یک خط","stream.readline()","size اختیاری","یک خط را می‌خواند","str / bytes"],
-["readlines()","خواندن همه خطوط","stream.readlines()","hint اختیاری","خطوط را به صورت لیست می‌خواند","list"],
-["writelines()","نوشتن چند خط","stream.writelines(lines)","lines","چند رشته را پشت سر هم می‌نویسد","بدون خروجی"],
-["truncate()","کوتاه کردن جریان","stream.truncate(size=None)","size اختیاری","محتوای جریان را از اندازه مشخص کوتاه می‌کند","size"],
-["flush()","ارسال داده به جریان","stream.flush()","—","buffer را تخلیه می‌کند","بدون خروجی"],
-["getvalue()","گرفتن محتوای StringIO","stream.getvalue()","—","کل محتوای RAM stream را می‌دهد","str / bytes"],
-["seekable()","بررسی قابل seek بودن","stream.seekable()","—","قابلیت تغییر مکان را بررسی می‌کند","bool"],
-["readable()","بررسی قابل خواندن بودن","stream.readable()","—","قابلیت خواندن را بررسی می‌کند","bool"],
-["writable()","بررسی قابل نوشتن بودن","stream.writable()","—","قابلیت نوشتن را بررسی می‌کند","bool"]
-],
-
-"mimetypes":[
-["init()","راه‌اندازی MIME database","mimetypes.init(files=None)","files اختیاری","پایگاه MIME را مقداردهی می‌کند","بدون خروجی"],
-["add_type()","افزودن MIME type","mimetypes.add_type(type, ext)","type, ext","یک ارتباط MIME و پسوند اضافه می‌کند","بدون خروجی"],
-["guess_all_extensions()","حدس همه پسوندها","mimetypes.guess_all_extensions(type)","type","همه پسوندهای شناخته‌شده برای MIME را می‌دهد","list"],
-["types_map","نقشه نوع فایل","mimetypes.types_map","—","mapping پسوند به MIME را نشان می‌دهد","dict"],
-["common_types","نوع‌های رایج","mimetypes.common_types","—","نوع‌های MIME رایج را نگه می‌دارد","dict"],
-["inited","وضعیت initialization","mimetypes.inited","—","وضعیت مقداردهی database را نشان می‌دهد","bool"]
-],
-
-"tarfile":[
-["gettarinfo()","ساخت اطلاعات TarInfo","tarfile.gettarinfo(name, arcname=None)","name + options","metadata یک فایل را برای tar می‌سازد","TarInfo"],
-["getmembers()","گرفتن اعضای آرشیو","tar.getmembers()","—","لیست اعضای tar را می‌دهد","list"],
-["getnames()","نام اعضای آرشیو","tar.getnames()","—","نام فایل‌های داخل tar را می‌دهد","list"],
-["getmember()","گرفتن یک عضو","tar.getmember(name)","name","TarInfo مربوط به نام را می‌دهد","TarInfo"],
-["extract()","استخراج یک عضو","tar.extract(member, path='.')","member, path","یک فایل/عضو را استخراج می‌کند","بدون خروجی"],
-["extractfile()","خواندن عضو به شکل file","tar.extractfile(member)","member","محتوای یک عضو را به شکل stream می‌دهد","file object"],
-["close()","بستن آرشیو","tar.close()","—","آرشیو را می‌بندد","بدون خروجی"],
-["is_tarfile()","تشخیص tar بودن فایل","tarfile.is_tarfile(name)","name","بررسی می‌کند فایل یک tar معتبر است یا نه","bool"],
-["TarInfo","ساخت اطلاعات عضو","tarfile.TarInfo(name)","name","اطلاعات یک عضو آرشیو را مدل می‌کند","TarInfo"]
-],
-
-"gzip / bz2 / lzma":[
-["gzip.compress()","فشرده‌سازی gzip در حافظه","gzip.compress(data)","bytes","داده را به gzip تبدیل می‌کند","bytes"],
-["gzip.decompress()","بازکردن gzip","gzip.decompress(data)","bytes","داده gzip را باز می‌کند","bytes"],
-["bz2.compress()","فشرده‌سازی BZ2","bz2.compress(data)","bytes","داده را با BZ2 فشرده می‌کند","bytes"],
-["bz2.decompress()","بازکردن BZ2","bz2.decompress(data)","bytes","داده BZ2 را باز می‌کند","bytes"],
-["lzma.compress()","فشرده‌سازی LZMA","lzma.compress(data)","bytes","داده را با LZMA فشرده می‌کند","bytes"],
-["lzma.decompress()","بازکردن LZMA","lzma.decompress(data)","bytes","داده LZMA را باز می‌کند","bytes"],
-["GzipFile()","فایل gzip سطح پایین","gzip.GzipFile(filename, mode)","filename, mode","جریان gzip ایجاد می‌کند","file object"],
-["BZ2File()","فایل BZ2 سطح پایین","bz2.BZ2File(filename, mode)","filename, mode","جریان BZ2 ایجاد می‌کند","file object"],
-["LZMAFile()","فایل LZMA سطح پایین","lzma.LZMAFile(filename, mode)","filename, mode","جریان LZMA ایجاد می‌کند","file object"]
-],
-
-"requests":[
-["put()","ارسال PUT","requests.put(url, data=None, json=None)","url + data/json","درخواست PUT ارسال می‌کند","Response"],
-["patch()","ارسال PATCH","requests.patch(url, data=None, json=None)","url + data/json","بخشی از یک منبع را به‌روزرسانی می‌کند","Response"],
-["delete()","ارسال DELETE","requests.delete(url)","url + options","درخواست حذف HTTP می‌فرستد","Response"],
-["head()","ارسال HEAD","requests.head(url)","url + options","فقط headerهای پاسخ را درخواست می‌کند","Response"],
-["options()","ارسال OPTIONS","requests.options(url)","url + options","قابلیت‌های HTTP endpoint را می‌پرسد","Response"],
-["Session()","ساخت session","requests.Session()","—","اتصالات و cookieها را بین درخواست‌ها حفظ می‌کند","Session"],
-["headers","خواندن headerها","response.headers","—","headerهای پاسخ را می‌خواند","CaseInsensitiveDict"],
-["text","متن پاسخ","response.text","—","بدنه پاسخ را به صورت متن می‌دهد","str"],
-["content","محتوای باینری","response.content","—","بدنه پاسخ را به شکل bytes می‌دهد","bytes"],
-["raise_for_status()","بررسی خطای HTTP","response.raise_for_status()","—","برای statusهای خطادار exception ایجاد می‌کند","None / Exception"],
-["timeout","محدودیت زمان","requests.get(url, timeout=5)","seconds","مدت انتظار برای پاسخ را محدود می‌کند","Response / Timeout"],
-["params","پارامترهای URL","requests.get(url, params={'q':'python'})","mapping","پارامتر query string اضافه می‌کند","Response"],
-["auth","احراز هویت","requests.get(url, auth=(user, password))","credentials","اطلاعات authentication را می‌فرستد","Response"]
-],
-
-"argparse":[
-["add_subparsers()","ساخت زیرفرمان‌ها","parser.add_subparsers(dest='command')","options","برای ابزارهای چندفرمانی زیرparser می‌سازد","SubParsers"],
-["set_defaults()","تنظیم مقدار پیش‌فرض","parser.set_defaults(func=handler)","key/value","مقادیر پیش‌فرض namespace را تعیین می‌کند","بدون خروجی"],
-["add_mutually_exclusive_group()","گروه گزینه‌های انحصاری","parser.add_mutually_exclusive_group()","—","گزینه‌هایی می‌سازد که هم‌زمان قابل استفاده نیستند","Group"],
-["type","تبدیل نوع ورودی","parser.add_argument('--age', type=int)","callable","متن ورودی را به نوع مورد نظر تبدیل می‌کند","typed value"],
-["default","مقدار پیش‌فرض","parser.add_argument('--name', default='Hasti')","value","برای نبودن آرگومان مقدار پیش‌فرض می‌دهد","value"],
-["choices","محدود کردن گزینه‌ها","parser.add_argument('--mode', choices=['a','b'])","list","فقط گزینه‌های تعیین‌شده را قبول می‌کند","value"],
-["required","اجباری کردن گزینه","parser.add_argument('--file', required=True)","bool","وجود آرگومان را الزامی می‌کند","value"],
-["help","متن راهنما","parser.add_argument('--file', help='...')","text","راهنمای گزینه را برای کاربر نمایش می‌دهد","help text"]
-],
-
-"xml.etree.ElementTree":[
-["SubElement()","ساخت فرزند XML","ET.SubElement(parent, tag)","parent, tag","یک عنصر فرزند به XML اضافه می‌کند","Element"],
-["tostring()","تبدیل XML به bytes","ET.tostring(element, encoding='unicode')","element + options","درخت XML را به متن/bytes تبدیل می‌کند","str / bytes"],
-["ElementTree()","ساخت درخت XML","ET.ElementTree(element)","element","یک ElementTree ایجاد می‌کند","ElementTree"],
-["write()","ذخیره XML","tree.write(file, encoding='utf-8')","file + options","درخت XML را در فایل ذخیره می‌کند","بدون خروجی"],
-["findall()","پیدا کردن همه عناصر","root.findall(match)","match","تمام عناصر مطابق را پیدا می‌کند","list"],
-["iter()","پیمایش عناصر","root.iter(tag=None)","tag اختیاری","تمام عناصر درخت را پیمایش می‌کند","iterator"],
-["get()","گرفتن attribute","element.get(key)","key","مقدار یک ویژگی XML را می‌خواند","str / None"],
-["set()","تنظیم attribute","element.set(key, value)","key, value","ویژگی یک عنصر را تنظیم می‌کند","بدون خروجی"],
-["append()","افزودن فرزند","element.append(child)","child","یک عنصر را به فرزندان اضافه می‌کند","بدون خروجی"],
-["remove()","حذف فرزند","element.remove(subelement)","subelement","یک فرزند را حذف می‌کند","بدون خروجی"],
-["text","متن عنصر","element.text","—","متن داخل عنصر را می‌خواند/تنظیم می‌کند","str / None"]
-],
-
-"configparser":[
-["sections()","فهرست sectionها","config.sections()","—","نام بخش‌های فایل INI را می‌دهد","list"],
-["has_section()","بررسی section","config.has_section(section)","section","وجود بخش را بررسی می‌کند","bool"],
-["has_option()","بررسی option","config.has_option(section, option)","section, option","وجود یک گزینه را بررسی می‌کند","bool"],
-["items()","گرفتن گزینه‌ها","config.items(section)","section","تمام گزینه‌های یک بخش را می‌دهد","list"],
-["remove_option()","حذف option","config.remove_option(section, option)","section, option","یک گزینه را حذف می‌کند","bool"],
-["remove_section()","حذف section","config.remove_section(section)","section","یک بخش را حذف می‌کند","bool"],
-["add_section()","افزودن section","config.add_section(section)","section","بخش جدیدی می‌سازد","بدون خروجی"],
-["write()","ذخیره تنظیمات","config.write(file_object)","file object","تنظیمات را در فایل می‌نویسد","بدون خروجی"],
-["getint()","خواندن عدد صحیح","config.getint(section, option)","section, option","مقدار option را به int تبدیل می‌کند","int"],
-["getfloat()","خواندن عدد اعشاری","config.getfloat(section, option)","section, option","مقدار را به float تبدیل می‌کند","float"],
-["getboolean()","خواندن مقدار منطقی","config.getboolean(section, option)","section, option","مقدار را به bool تبدیل می‌کند","bool"]
-],
-
-"time":[
-["monotonic()","زمان یکنواخت","time.monotonic()","—","ساعتی مناسب برای اندازه‌گیری فاصله زمانی می‌دهد","float"],
-["process_time()","زمان CPU پردازش","time.process_time()","—","زمان مصرف CPU فرایند را می‌سنجد","float"],
-["thread_time()","زمان CPU thread","time.thread_time()","—","زمان CPU thread فعلی را می‌سنجد","float"],
-["ctime()","تبدیل timestamp به متن","time.ctime(seconds=None)","seconds اختیاری","timestamp را به رشته زمانی تبدیل می‌کند","str"],
-["localtime()","زمان محلی","time.localtime(seconds=None)","seconds اختیاری","timestamp را به ساختار زمان محلی تبدیل می‌کند","struct_time"],
-["gmtime()","زمان UTC","time.gmtime(seconds=None)","seconds اختیاری","timestamp را به UTC تبدیل می‌کند","struct_time"],
-["strftime()","قالب‌بندی زمان","time.strftime(format, t)","format, time","زمان را با قالب دلخواه نمایش می‌دهد","str"],
-["strptime()","تبدیل متن به زمان","time.strptime(string, format)","string, format","رشته زمان را parse می‌کند","struct_time"],
-["sleep()","توقف اجرای برنامه","time.sleep(seconds)","seconds","برای مدت مشخص مکث می‌کند","بدون خروجی"],
-["tzset()","اعمال timezone محیط","time.tzset()","—","تنظیمات timezone محیط را اعمال می‌کند","بدون خروجی"]
-],
-
-"sys / platform":[
-["sys.executable","مسیر Python اجراکننده","sys.executable","—","مسیر مفسر Python فعلی را می‌دهد","str"],
-["sys.path","مسیرهای import","sys.path","—","مسیرهای جستجوی moduleها را نشان می‌دهد","list"],
-["sys.platform","شناسه سیستم‌عامل","sys.platform","—","شناسه platform فعلی را می‌دهد","str"],
-["sys.exit()","خروج از برنامه","sys.exit(code=0)","code اختیاری","اجرای برنامه را با کد خروج پایان می‌دهد","SystemExit"],
-["platform.node()","نام دستگاه","platform.node()","—","نام شبکه‌ای دستگاه را می‌دهد","str"],
-["platform.machine()","نوع ماشین","platform.machine()","—","معماری ماشین را گزارش می‌کند","str"],
-["platform.processor()","نام پردازنده","platform.processor()","—","اطلاعات پردازنده را گزارش می‌کند","str"],
-["platform.platform()","خلاصه سیستم","platform.platform()","—","اطلاعات ترکیبی سیستم‌عامل را می‌دهد","str"],
-["platform.architecture()","معماری Python","platform.architecture()","—","bitness و executable را گزارش می‌کند","tuple"],
-["platform.release()","نسخه سیستم‌عامل","platform.release()","—","release سیستم‌عامل را می‌دهد","str"],
-["platform.uname()","اطلاعات کامل سیستم","platform.uname()","—","اطلاعات سیستم را در یک ساختار می‌دهد","tuple-like"]
-],
-
-"threading / multiprocessing":[
-["current_thread()","thread فعلی","threading.current_thread()","—","thread در حال اجرا را می‌دهد","Thread"],
-["active_count()","تعداد threadهای فعال","threading.active_count()","—","تعداد threadهای فعال را می‌شمارد","int"],
-["Lock()","ساخت قفل thread","threading.Lock()","—","از دسترسی هم‌زمان به بخش مشترک جلوگیری می‌کند","Lock"],
-["Event()","ساخت event","threading.Event()","—","برای هماهنگ‌سازی threadها استفاده می‌شود","Event"],
-["Semaphore()","ساخت semaphore","threading.Semaphore(value)","value","تعداد دسترسی هم‌زمان را محدود می‌کند","Semaphore"],
-["Queue()","صف امن برای thread","queue.Queue(maxsize=0)","maxsize اختیاری","داده را بین threadها منتقل می‌کند","Queue"],
-["Pool()","ساخت process pool","multiprocessing.Pool(processes)","processes اختیاری","چند process را برای کارهای مشابه مدیریت می‌کند","Pool"],
-["apply_async()","اجرای غیرهم‌زمان در Pool","pool.apply_async(func, args)","func, args","کار را به process pool می‌فرستد","AsyncResult"],
-["map()","اجرای map در Pool","pool.map(func, iterable)","func, iterable","تابع را روی چند داده اجرا می‌کند","list"],
-["is_alive()","بررسی زنده بودن","thread.is_alive()","—","وضعیت thread/process را بررسی می‌کند","bool"],
-["daemon","thread daemon","thread.daemon","—","تعیین می‌کند thread daemon باشد یا نه","bool"]
-],
-
-"sqlite3":[
-["execute()","اجرای SQL","cursor.execute(sql, parameters)","SQL + parameters","دستور SQL را اجرا می‌کند","Cursor"],
-["executemany()","اجرای SQL برای چند ردیف","cursor.executemany(sql, seq_of_parameters)","SQL + data","یک دستور را روی چند مجموعه داده اجرا می‌کند","Cursor"],
-["executescript()","اجرای چند دستور SQL","cursor.executescript(script)","script","چند دستور SQL را پشت سر هم اجرا می‌کند","Cursor"],
-["fetchone()","گرفتن یک ردیف","cursor.fetchone()","—","یک ردیف از نتیجه را می‌دهد","tuple / None"],
-["fetchmany()","گرفتن چند ردیف","cursor.fetchmany(size)","size","تعداد مشخصی ردیف می‌گیرد","list"],
-["commit()","ثبت تغییرات","connection.commit()","—","تغییرات تراکنش را ذخیره می‌کند","بدون خروجی"],
-["rollback()","برگرداندن تراکنش","connection.rollback()","—","تغییرات ثبت‌نشده را لغو می‌کند","بدون خروجی"],
-["close()","بستن اتصال","connection.close()","—","اتصال دیتابیس را می‌بندد","بدون خروجی"],
-["rowcount","تعداد ردیف تغییرکرده","cursor.rowcount","—","تعداد ردیف‌های متاثر از عملیات را نشان می‌دهد","int"],
-["lastrowid","شناسه آخرین رکورد","cursor.lastrowid","—","آخرین id تولیدشده را می‌دهد","int"]
-],
-
-"PDF tools":[
-["pages","دسترسی به صفحات","reader.pages","—","صفحات PDF را در اختیار می‌گذارد","list-like"],
-["extract_text()","استخراج متن PDF","page.extract_text()","—","متن یک صفحه را استخراج می‌کند","str"],
-["merge_page()","ادغام دو صفحه","page.merge_page(other)","page","محتوای دو صفحه را روی هم قرار می‌دهد","Page"],
-["add_page()","افزودن صفحه","writer.add_page(page)","page","یک صفحه را به خروجی اضافه می‌کند","بدون خروجی"],
-["write()","نوشتن PDF","writer.write(stream)","stream","PDF ساخته‌شده را ذخیره می‌کند","بدون خروجی"],
-["insert_pdf()","ادغام PDFها با PyMuPDF","doc.insert_pdf(other)","other document","صفحات یک PDF را وارد دیگری می‌کند","بدون خروجی"],
-["page_count","تعداد صفحات","doc.page_count","—","تعداد صفحات سند را می‌دهد","int"],
-["load_page()","باز کردن صفحه","doc.load_page(index)","index","یک صفحه را برای پردازش باز می‌کند","Page"],
-["get_text()","استخراج متن صفحه","page.get_text()","options اختیاری","متن صفحه را استخراج می‌کند","str"],
-["get_pixmap()","رندر صفحه به تصویر","page.get_pixmap()","options","صفحه را به تصویر تبدیل می‌کند","Pixmap"],
-["save()","ذخیره PDF با PyMuPDF","doc.save(path)","path","سند PDF را ذخیره می‌کند","بدون خروجی"]
-],
-
-"python-docx":[
-["add_heading()","افزودن عنوان","document.add_heading(text, level)","text, level","عنوان با سطح مشخص ایجاد می‌کند","Paragraph"],
-["add_picture()","افزودن تصویر","document.add_picture(image_path)","image_path + options","تصویر را وارد Word می‌کند","InlineShape"],
-["add_page_break()","افزودن شکست صفحه","document.add_page_break()","—","صفحه جدید ایجاد می‌کند","Paragraph"],
-["paragraphs","دسترسی به پاراگراف‌ها","document.paragraphs","—","فهرست پاراگراف‌های سند را می‌دهد","list"],
-["tables","دسترسی به جدول‌ها","document.tables","—","جدول‌های سند را می‌دهد","list"],
-["add_run()","افزودن متن به پاراگراف","paragraph.add_run(text)","text","یک run متنی به پاراگراف اضافه می‌کند","Run"],
-["bold","ضخیم کردن متن","run.bold = True","bool","متن run را Bold می‌کند","bool"],
-["italic","کج کردن متن","run.italic = True","bool","متن run را Italic می‌کند","bool"],
-["style","تغییر style پاراگراف","paragraph.style = 'Heading 1'","style","سبک پاراگراف را تغییر می‌دهد","Style"],
-["cell.text","متن سلول جدول","cell.text = value","value","محتوای یک سلول جدول را تنظیم می‌کند","str"],
-["rows","ردیف‌های جدول","table.rows","—","ردیف‌های جدول را در اختیار می‌گذارد","list-like"],
-["columns","ستون‌های جدول","table.columns","—","ستون‌های جدول را در اختیار می‌گذارد","list-like"],
-["section","بخش‌های سند","document.sections","—","بخش‌های سند و تنظیمات صفحه را می‌دهد","Sections"],
-["orientation","جهت صفحه","section.orientation = WD_ORIENT.LANDSCAPE","value","جهت صفحه را تغییر می‌دهد","orientation"],
-["add_table()","افزودن جدول","document.add_table(rows, cols)","rows, cols","جدول جدید می‌سازد","Table"]
-],
-
-"python-pptx":[
-["slide_layouts","دسترسی به layoutها","prs.slide_layouts","—","قالب‌های آماده اسلاید را می‌دهد","list-like"],
-["shapes","دسترسی به اشکال","slide.shapes","—","اشکال و کادرهای اسلاید را می‌دهد","ShapeTree"],
-["add_picture()","افزودن تصویر","slide.shapes.add_picture(image_path, left, top)","image + position","تصویر را روی اسلاید قرار می‌دهد","Picture"],
-["add_table()","افزودن جدول","slide.shapes.add_table(rows, cols, left, top, width, height)","rows, cols + geometry","جدول به اسلاید اضافه می‌کند","GraphicFrame"],
-["text_frame","دسترسی به کادر متن","shape.text_frame","—","متن داخل یک shape را مدیریت می‌کند","TextFrame"],
-["text","تنظیم متن shape","shape.text = text","text","متن shape را تنظیم می‌کند","str"],
-["paragraphs","پاراگراف‌های متن","shape.text_frame.paragraphs","—","پاراگراف‌های text frame را می‌دهد","list"],
-["font.size","اندازه فونت","run.font.size = Pt(24)","size","اندازه متن را تنظیم می‌کند","Length"],
-["font.bold","Bold کردن متن","run.font.bold = True","bool","متن را ضخیم می‌کند","bool"],
-["fill.solid()","پس‌زمینه شکل","shape.fill.solid()","—","نوع پرکردن شکل را solid می‌کند","FillFormat"],
-["slide_width","عرض اسلاید","prs.slide_width","—","عرض اسلاید را می‌دهد/تنظیم می‌کند","Length"],
-["slide_height","ارتفاع اسلاید","prs.slide_height","—","ارتفاع اسلاید را می‌دهد/تنظیم می‌کند","Length"]
-],
-
-"watchfiles":[
-["watch()","نظارت روی مسیر","watch(path)","path","تغییرات مسیر را دنبال می‌کند","generator"],
-["Change.added","رویداد ایجاد","Change.added","—","نشان‌دهنده ایجاد فایل/پوشه است","enum"],
-["Change.modified","رویداد تغییر","Change.modified","—","نشان‌دهنده تغییر فایل/پوشه است","enum"],
-["Change.deleted","رویداد حذف","Change.deleted","—","نشان‌دهنده حذف فایل/پوشه است","enum"],
-["awatch()","نظارت async","awatch(path)","path + options","نسخه async برای watch است","async generator"],
-["debounce","کاهش رویدادهای تکراری","watch(path, debounce=1600)","milliseconds","رویدادهای پشت‌سرهم را ادغام می‌کند","changes"],
-["step","حداکثر تعداد تغییرات","watch(path, step=50)","count","تعداد تغییرات هر batch را کنترل می‌کند","changes"],
-["stop_event","توقف نظارت","watch(path, stop_event=event)","event","با event می‌توان watch را متوقف کرد","watcher"]
-],
-
-"APScheduler":[
-["DateTrigger","اجرای یک‌باره در تاریخ مشخص","DateTrigger(run_date)","run_date","trigger اجرای یک‌باره می‌سازد","Trigger"],
-["IntervalTrigger","اجرای دوره‌ای","IntervalTrigger(hours=1)","interval options","trigger تکرارشونده می‌سازد","Trigger"],
-["CronTrigger","اجرای زمان‌بندی‌شده با cron","CronTrigger(hour=10)","cron fields","زمان‌بندی دقیق بر اساس تقویم می‌سازد","Trigger"],
-["pause()","مکث job","scheduler.pause_job(job_id)","job_id","اجرای job را موقتاً متوقف می‌کند","Job"],
-["resume()","ادامه job","scheduler.resume_job(job_id)","job_id","job متوقف‌شده را فعال می‌کند","Job"],
-["remove_job()","حذف job","scheduler.remove_job(job_id)","job_id","یک job را حذف می‌کند","بدون خروجی"],
-["get_jobs()","گرفتن jobها","scheduler.get_jobs()","—","jobهای زمان‌بندی‌شده را می‌دهد","list"],
-["modify_job()","تغییر job","scheduler.modify_job(job_id, name=...)","job_id + options","ویژگی‌های job را تغییر می‌دهد","Job"],
-["reschedule_job()","تغییر زمان‌بندی","scheduler.reschedule_job(job_id, trigger)","job_id, trigger","trigger یک job را عوض می‌کند","Job"],
-["running","وضعیت scheduler","scheduler.running","—","فعال بودن scheduler را نشان می‌دهد","bool"]
-],
-
-"httpx":[
-["post()","POST همگام","httpx.post(url, json=data)","url + data","درخواست POST می‌فرستد","Response"],
-["put()","PUT همگام","httpx.put(url, json=data)","url + data","درخواست PUT می‌فرستد","Response"],
-["patch()","PATCH همگام","httpx.patch(url, json=data)","url + data","درخواست PATCH می‌فرستد","Response"],
-["delete()","DELETE همگام","httpx.delete(url)","url","درخواست DELETE می‌فرستد","Response"],
-["request()","درخواست عمومی HTTP","client.request(method, url)","method, url + options","هر نوع HTTP request را ارسال می‌کند","Response"],
-["get()","GET با Client","client.get(url)","url + options","GET را با client اجرا می‌کند","Response"],
-["post()","POST با Client","client.post(url, json=data)","url + data","POST را با client اجرا می‌کند","Response"],
-["status_code","کد وضعیت","response.status_code","—","کد HTTP پاسخ را می‌دهد","int"],
-["headers","headerهای پاسخ","response.headers","—","headerهای پاسخ را می‌دهد","Headers"],
-["text","متن پاسخ","response.text","—","متن پاسخ را می‌دهد","str"],
-["json()","خواندن JSON","response.json()","—","JSON پاسخ را parse می‌کند","dict/list"],
-["raise_for_status()","بررسی خطا","response.raise_for_status()","—","برای status خطادار exception می‌دهد","None / Exception"],
-["stream()","دریافت streaming","client.stream(method, url)","method, url","پاسخ را به صورت stream دریافت می‌کند","context manager"]
-],
-
-"filelock":[
-["SoftFileLock()","قفل نرم فایل","SoftFileLock(lock_file)","lock_file","قفل فایل با مکانیزم نرم ایجاد می‌کند","Lock"],
-["acquire()","گرفتن قفل","lock.acquire(timeout=10)","timeout","تا زمان مشخص برای قفل صبر می‌کند","Lock"],
-["release()","آزاد کردن قفل","lock.release()","—","قفل را آزاد می‌کند","بدون خروجی"],
-["is_locked","بررسی قفل بودن","lock.is_locked","—","بررسی می‌کند قفل فعال است یا نه","bool"],
-["lock_file","مسیر فایل قفل","lock.lock_file","—","مسیر فایل قفل را می‌دهد","str"],
-["timeout","زمان انتظار","lock.timeout","—","مقدار timeout قفل را نگه می‌دارد","float"],
-["blocking","حالت blocking","lock.blocking","—","تعیین می‌کند acquire منتظر بماند یا نه","bool"],
-["__enter__()","گرفتن قفل با with","lock.__enter__()","—","برای استفاده با with قفل را می‌گیرد","Lock"],
-["__exit__()","آزادسازی با with","lock.__exit__(...)","—","در پایان with قفل را آزاد می‌کند","بدون خروجی"]
-]
+const state = {
+  lib:"os",
+  category:"همه",
+  chain:[]
 };
 
-for(const l of LIBS){
-  if(EXTRA_TOOLS[l.id]){
-    l.tools.push(...EXTRA_TOOLS[l.id]);
+const $ = id => document.getElementById(id);
+
+const allTools = () =>
+  LIBS.reduce((n,l) => n + l.tools.length, 0);
+
+
+/* =========================================================
+   VIRTUAL FILE SYSTEM
+   ========================================================= */
+
+const INITIAL_FILES = [
+  {type:"file",name:"photo.jpg",size:"2.4 MB",kind:"image"},
+  {type:"file",name:"video.mp4",size:"18.7 MB",kind:"video"},
+  {type:"file",name:"report.docx",size:"84 KB",kind:"word"},
+  {type:"file",name:"presentation.pptx",size:"1.2 MB",kind:"powerpoint"},
+  {type:"file",name:"students.csv",size:"12 KB",kind:"csv"},
+  {type:"file",name:"data.xlsx",size:"31 KB",kind:"excel"},
+  {type:"file",name:"notes.txt",size:"4 KB",kind:"text"}
+];
+
+const VFS = {
+  root:{
+    type:"folder",
+    name:"PythonLab",
+    children:JSON.parse(JSON.stringify(INITIAL_FILES))
   }
-}
+};
 
-const state={lib:"os",category:"همه",chain:[]};
+let selectedPath = null;
+let liveLog = [];
 
-const $=id=>document.getElementById(id);
-const allTools=()=>LIBS.reduce((n,l)=>n+l.tools.length,0);
+
+/* =========================================================
+   INIT
+   ========================================================= */
 
 function init(){
-  $("libraryStat").textContent=LIBS.length;
-  $("methodStat").textContent=allTools();
-  $("toolCount").textContent=LIBS.length;
+
+  if($("libraryStat"))
+    $("libraryStat").textContent = LIBS.length;
+
+  if($("methodStat"))
+    $("methodStat").textContent = allTools();
+
+  if($("toolCount"))
+    $("toolCount").textContent = LIBS.length;
+
   renderCategories();
   renderNav();
   renderCards();
   selectLib("os");
 
-  $("startBtn").onclick=()=>{
-    $("explore").scrollIntoView({behavior:"smooth"});
-  };
+  if($("startBtn"))
+    $("startBtn").onclick = () =>
+      $("explore")?.scrollIntoView({behavior:"smooth"});
 
-  $("randomBtn").onclick=()=>{
-    selectLib(LIBS[Math.floor(Math.random()*LIBS.length)].id);
-  };
+  if($("randomBtn"))
+    $("randomBtn").onclick = () =>
+      selectLib(LIBS[Math.floor(Math.random()*LIBS.length)].id);
 
-  $("clearBuilder").onclick=()=>{
-    state.chain=[];
-    renderChain();
-  };
+  if($("clearBuilder"))
+    $("clearBuilder").onclick = () => {
+      state.chain = [];
+      renderChain();
+    };
 
-  $("runChain").onclick=runChain;
-  $("copyCode").onclick=copyCode;
-  $("modalClose").onclick=closeModal;
+  if($("runChain"))
+    $("runChain").onclick = runChain;
 
-  $("modalBackdrop").onclick=e=>{
-    if(e.target.id==="modalBackdrop") closeModal();
-  };
+  if($("copyCode"))
+    $("copyCode").onclick = copyCode;
 
-  $("themeBtn").onclick=()=>{
-    document.body.classList.toggle("light");
-  };
+  if($("modalClose"))
+    $("modalClose").onclick = closeModal;
 
-  $("presentBtn").onclick=()=>{
-    document.body.classList.toggle("presentation");
-    toast(
-      document.body.classList.contains("presentation")
-      ? "حالت ارائه فعال شد"
-      : "حالت عادی فعال شد"
-    );
-  };
+  if($("modalBackdrop"))
+    $("modalBackdrop").onclick = e => {
+      if(e.target.id === "modalBackdrop") closeModal();
+    };
 
-  $("homeBtn").onclick=()=>{
-    window.scrollTo({top:0,behavior:"smooth"});
-  };
+  if($("themeBtn"))
+    $("themeBtn").onclick = () =>
+      document.body.classList.toggle("light");
 
-  $("searchInput").oninput=renderNav;
+  if($("presentBtn"))
+    $("presentBtn").onclick = () => {
+      document.body.classList.toggle("presentation");
+      toast(
+        document.body.classList.contains("presentation")
+          ? "حالت ارائه فعال شد"
+          : "حالت عادی فعال شد"
+      );
+    };
+
+  if($("homeBtn"))
+    $("homeBtn").onclick = () =>
+      window.scrollTo({top:0,behavior:"smooth"});
+
+  if($("searchInput"))
+    $("searchInput").oninput = renderNav;
+
+  renderFileExplorer();
+  renderLiveLog("محیط نمایشی آماده است.");
 }
 
-function renderCategories(){
-  const cats=["همه",...new Set(LIBS.map(x=>x.cat))];
 
-  $("categoryRow").innerHTML=cats.map(c=>
-    `<button class="cat ${c===state.category?"active":""}" data-cat="${c}">${c}</button>`
+/* =========================================================
+   LIBRARY NAVIGATION
+   ========================================================= */
+
+function renderCategories(){
+
+  const cats = ["همه", ...new Set(LIBS.map(x => x.cat))];
+
+  const row = $("categoryRow");
+  if(!row) return;
+
+  row.innerHTML = cats.map(c =>
+    `<button class="cat ${c===state.category?"active":""}"
+      data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`
   ).join("");
 
-  document.querySelectorAll(".cat").forEach(b=>{
-    b.onclick=()=>{
-      state.category=b.dataset.cat;
+  document.querySelectorAll(".cat").forEach(b => {
+    b.onclick = () => {
+      state.category = b.dataset.cat;
       renderCategories();
       renderNav();
       renderCards();
@@ -727,89 +612,114 @@ function renderCategories(){
   });
 }
 
+
 function filteredLibs(){
-  const q=$("searchInput").value.trim().toLowerCase();
 
-  return LIBS.filter(l=>{
-    const catOk=state.category==="همه"||l.cat===state.category;
+  const q = ($("searchInput")?.value || "")
+    .trim()
+    .toLowerCase();
 
-    const text=(
-      l.name+" "+
-      l.desc+" "+
-      l.tools.map(t=>t.join(" ")).join(" ")
+  return LIBS.filter(l => {
+
+    const catOk =
+      state.category === "همه" ||
+      l.cat === state.category;
+
+    const text = (
+      l.name + " " +
+      l.desc + " " +
+      l.tools.map(t => t.join(" ")).join(" ")
     ).toLowerCase();
 
-    return catOk&&(!q||text.includes(q));
+    return catOk && (!q || text.includes(q));
   });
 }
+
 
 function renderNav(){
-  const libs=filteredLibs();
 
-  $("libraryNav").innerHTML=libs.map(l=>
-    `<div class="nav-item ${l.id===state.lib?"active":""}" data-id="${l.id}">
-      <span class="nav-icon">${l.icon}</span>
-      <span>${l.name}</span>
-    </div>`
-  ).join("") ||
-  `<div class="nav-group-title">موردی پیدا نشد.</div>`;
+  const libs = filteredLibs();
 
-  document.querySelectorAll(".nav-item").forEach(x=>{
-    x.onclick=()=>selectLib(x.dataset.id);
-  });
+  const nav = $("libraryNav");
+  if(!nav) return;
+
+  nav.innerHTML =
+    libs.map(l =>
+      `<div class="nav-item ${l.id===state.lib?"active":""}"
+        data-id="${escapeHtml(l.id)}">
+        <span class="nav-icon">${l.icon}</span>
+        <span>${escapeHtml(l.name)}</span>
+      </div>`
+    ).join("") ||
+    `<div class="nav-group-title">موردی پیدا نشد.</div>`;
+
+  document.querySelectorAll(".nav-item").forEach(x =>
+    x.onclick = () => selectLib(x.dataset.id)
+  );
 }
 
-function renderCards(){
-  const libs=filteredLibs();
 
-  $("libraryGrid").innerHTML=libs.map(l=>
-    `<article class="lib-card" data-id="${l.id}">
+function renderCards(){
+
+  const libs = filteredLibs();
+  const grid = $("libraryGrid");
+  if(!grid) return;
+
+  grid.innerHTML = libs.map(l =>
+    `<article class="lib-card" data-id="${escapeHtml(l.id)}">
       <div class="lib-icon">${l.icon}</div>
-      <h3>${l.name}</h3>
-      <p>${l.desc}</p>
+      <h3>${escapeHtml(l.name)}</h3>
+      <p>${escapeHtml(l.desc)}</p>
       <span class="lib-meta">${l.tools.length} ابزار</span>
     </article>`
   ).join("");
 
-  document.querySelectorAll(".lib-card").forEach(x=>{
-    x.onclick=()=>selectLib(x.dataset.id);
-  });
+  document.querySelectorAll(".lib-card").forEach(x =>
+    x.onclick = () => selectLib(x.dataset.id)
+  );
 }
 
+
 function selectLib(id){
-  state.lib=id;
 
-  const l=LIBS.find(x=>x.id===id);
-  if(!l)return;
+  state.lib = id;
 
-  $("labTitle").textContent=l.name+" — آزمایشگاه";
+  const l = LIBS.find(x => x.id === id);
+  if(!l) return;
 
-  $("toolList").innerHTML=l.tools.map((t,i)=>
-    `<div class="tool-card" data-i="${i}">
-      <div>
-        <div class="tool-name">${t[0]}</div>
-        <div class="tool-desc">${t[1]}</div>
-      </div>
-      <button class="help-btn" data-help="${i}">?</button>
-    </div>`
-  ).join("");
+  if($("labTitle"))
+    $("labTitle").textContent = l.name + " — آزمایشگاه";
 
-  document.querySelectorAll(".tool-card").forEach(c=>{
-    c.onclick=e=>{
-      if(e.target.classList.contains("help-btn"))return;
+  if($("toolList"))
+    $("toolList").innerHTML = l.tools.map((t,i) =>
+      `<div class="tool-card" data-i="${i}">
+        <div>
+          <div class="tool-name">${escapeHtml(t[0])}</div>
+          <div class="tool-desc">${escapeHtml(t[1])}</div>
+        </div>
+        <button class="help-btn" data-help="${i}">?</button>
+      </div>`
+    ).join("");
 
-      addTool(
-        l.tools[+c.dataset.i],
-        l
-      );
+  document.querySelectorAll(".tool-card").forEach(c => {
+
+    c.onclick = e => {
+      if(e.target.classList.contains("help-btn")) return;
+
+      const tool =
+        l.tools[Number(c.dataset.i)];
+
+      addTool(tool,l);
     };
   });
 
-  document.querySelectorAll(".help-btn").forEach(b=>{
-    b.onclick=e=>{
+  document.querySelectorAll(".help-btn").forEach(b => {
+
+    b.onclick = e => {
       e.stopPropagation();
+
       openModal(
-        l.tools[+b.dataset.help],
+        l.tools[Number(b.dataset.help)],
         l
       );
     };
@@ -818,110 +728,175 @@ function selectLib(id){
   renderNav();
   renderCards();
 
-  $("labSection").scrollIntoView({
+  $("labSection")?.scrollIntoView({
     behavior:"smooth",
     block:"start"
   });
 }
 
+
+/* =========================================================
+   ARGUMENT HANDLING
+   ========================================================= */
+
 function parseSignatureArgs(signature){
-  const m=signature.match(/\((.*)\)/);
 
-  if(!m)return [];
+  const m = signature.match(/\((.*)\)/);
 
-  const body=m[1].trim();
+  if(!m) return [];
 
-  if(!body || body==="..." || body==="—"){
+  const body = m[1].trim();
+
+  if(!body || body==="..." || body==="—")
     return [];
-  }
 
   return body
     .split(",")
-    .map(x=>x.trim())
+    .map(x => x.trim())
     .filter(Boolean)
-    .map(x=>x.replace(/\s*=.*$/,""));
+    .map(x =>
+      x
+        .replace(/\*\*/g,"")
+        .replace(/\*/g,"")
+        .replace(/\s*=.*$/,"")
+    );
 }
 
+
+function defaultValueForArg(arg){
+
+  const selected = selectedPath || "";
+
+  if(
+    ["path","filename","source","url","name","src","dst",
+     "f1","f2","pdf_path","database","lock_file"].includes(arg)
+  ){
+    return selected;
+  }
+
+  if(arg === "pattern")
+    return "*.txt";
+
+  if(arg === "text")
+    return "Hello Python";
+
+  if(arg === "seconds")
+    return "2";
+
+  if(arg === "n")
+    return "5";
+
+  if(arg === "row")
+    return "1";
+
+  if(arg === "column")
+    return "1";
+
+  if(arg === "type")
+    return "application/pdf";
+
+  if(arg === "data")
+    return "Hello Python";
+
+  if(arg === "method")
+    return "GET";
+
+  if(arg === "interval")
+    return "10";
+
+  if(arg === "tag")
+    return "demo";
+
+  return "";
+}
+
+
+function isOptionalArg(t,arg,index){
+
+  const signature = t[2] || "";
+  const info = (t[3] || "") + " " + signature;
+
+  return (
+    /optional|اختیاری|None/i.test(info) &&
+    index > 0
+  );
+}
+
+
 function askToolArgs(t){
-  const args=parseSignatureArgs(t[2]);
 
-  if(!args.length)return {};
+  const args = parseSignatureArgs(t[2]);
 
-  const values={};
+  if(!args.length)
+    return {};
 
-  for(const arg of args){
+  const values = {};
 
-    const optional=
-      /optional|None|اختیاری/i.test(
-        t[3]+" "+t[2]
-      ) &&
-      arg!==args[0];
+  for(let i=0;i<args.length;i++){
 
-    let label=arg.replace(/\*/g,"");
-    let def="";
+    const arg = args[i];
 
     if(
-      arg==="path"||
-      arg==="filename"||
-      arg==="source"||
-      arg==="url"||
-      arg==="name"||
-      arg==="src"||
-      arg==="dst"||
-      arg==="f1"||
-      arg==="f2"||
-      arg==="pdf_path"
+      ["layout","options","kwargs","fn","iterable",
+       "handler","event","worksheet","other",
+       "element","root","job","trigger"].includes(arg)
     ){
-      def=selectedPath||"";
+      values[arg] = arg;
+      continue;
     }
 
-    if(arg==="pattern"){
-      def="*.txt";
-    }
+    const optional =
+      isOptionalArg(t,arg,i);
 
-    if(arg==="text"){
-      def="Hello Python";
-    }
+    const def = defaultValueForArg(arg);
 
-    if(arg==="seconds"){
-      def="2";
-    }
-
-    const v=prompt(
-      `مقدار ${label} را وارد کن${optional?" (اختیاری)":""}:`,
+    const v = prompt(
+      `مقدار ${arg} را وارد کن${optional?" (اختیاری)":""}:`,
       def
     );
 
-    if(v===null)return null;
+    if(v === null)
+      return null;
 
-    if(v!=="" || !optional){
-      values[arg]=v;
-    }
+    if(v !== "" || !optional)
+      values[arg] = v;
   }
 
   return values;
 }
 
+
+/* =========================================================
+   SIGNATURE BUILDER
+   ========================================================= */
+
 function fillSignature(signature,args){
-  return signature
-    .replace(
-      /([A-Za-z_][\w]*)\s*=\s*[^,)]+/g,
-      "$1"
-    )
-    .replace(
-      /([A-Za-z_][\w]*)/g,
-      m=>Object.prototype.hasOwnProperty.call(args,m)
+
+  return signature.replace(
+    /([A-Za-z_][\w]*)\s*=\s*[^,)]+/g,
+    "$1"
+  ).replace(
+    /([A-Za-z_][\w]*)/g,
+    m =>
+      Object.prototype.hasOwnProperty.call(args,m)
         ? JSON.stringify(args[m])
         : m
-    );
+  );
 }
 
+
+/* =========================================================
+   ADD TOOL
+   ========================================================= */
+
 function addTool(t,l){
-  const args=askToolArgs(t);
 
-  if(args===null)return;
+  const args = askToolArgs(t);
 
-  const customized=[
+  if(args === null)
+    return;
+
+  const customized = [
     t[0],
     t[1],
     fillSignature(t[2],args),
@@ -939,19 +914,25 @@ function addTool(t,l){
 
   renderChain();
 
-  if(!statePreview(customized,l,args)){
+  if(!statePreview(customized,l,args))
     preview(customized,l,args);
-  }
 }
 
+
+/* =========================================================
+   CHAIN
+   ========================================================= */
+
 function renderChain(){
-  const c=$("chain");
+
+  const c = $("chain");
+  if(!c) return;
 
   if(!state.chain.length){
 
-    c.className="chain empty";
+    c.className = "chain empty";
 
-    c.innerHTML=`
+    c.innerHTML = `
       <div class="empty-chain">
         <div class="drop-icon">＋</div>
         <b>بلوک‌ها را اینجا جمع کن</b>
@@ -965,58 +946,181 @@ function renderChain(){
     return;
   }
 
-  c.className="chain";
+  c.className = "chain";
 
-  c.innerHTML=state.chain.map((x,i)=>
+  c.innerHTML = state.chain.map((x,i) =>
     `<div class="chain-block">
       <span class="chain-index">
         ${String(i+1).padStart(2,"0")}
       </span>
+
       <code>${escapeHtml(x.tool[2])}</code>
-      <button class="remove-block" data-i="${i}">×</button>
+
+      <button class="remove-block" data-i="${i}">
+        ×
+      </button>
     </div>`
   ).join("");
 
-  document.querySelectorAll(".remove-block").forEach(b=>{
-    b.onclick=()=>{
-      state.chain.splice(+b.dataset.i,1);
+  document.querySelectorAll(".remove-block").forEach(b =>
+    b.onclick = () => {
+      state.chain.splice(
+        Number(b.dataset.i),
+        1
+      );
       renderChain();
-    };
-  });
+    }
+  );
 
   generateCode();
 }
 
+
+function importLine(lib){
+
+  const map = {
+    "os":"import os",
+    "pathlib":"from pathlib import Path",
+    "shutil":"import shutil",
+    "concurrent.futures":"from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor",
+    "hashlib":"import hashlib",
+    "openpyxl":"from openpyxl import Workbook, load_workbook",
+    "pandas":"import pandas as pd",
+    "watchdog":"from watchdog.observers import Observer",
+    "schedule":"import schedule",
+    "Send2Trash":"from send2trash import send2trash",
+    "fnmatch":"from fnmatch import fnmatch, filter",
+    "filecmp":"import filecmp",
+    "tempfile":"import tempfile",
+    "stat":"import stat",
+    "io":"import io",
+    "mimetypes":"import mimetypes",
+    "tarfile":"import tarfile",
+    "gzip / bz2 / lzma":"import gzip\nimport bz2\nimport lzma",
+    "requests":"import requests",
+    "argparse":"import argparse",
+    "xml.etree.ElementTree":"import xml.etree.ElementTree as ET",
+    "configparser":"import configparser",
+    "time":"import time",
+    "sys / platform":"import sys\nimport platform",
+    "threading / multiprocessing":"import threading\nimport multiprocessing",
+    "sqlite3":"import sqlite3",
+    "PDF tools":"# PDF library imports depend on the selected tool",
+    "python-docx":"from docx import Document",
+    "python-pptx":"from pptx import Presentation",
+    "watchfiles":"from watchfiles import watch",
+    "APScheduler":"from apscheduler.schedulers.background import BackgroundScheduler",
+    "httpx":"import httpx",
+    "filelock":"from filelock import FileLock"
+  };
+
+  return map[lib] || `# import ${lib}`;
+}
+
+
 function generateCode(){
 
+  const box = $("generatedCode");
+  if(!box) return;
+
   if(!state.chain.length){
-    $("generatedCode").textContent=
+
+    box.textContent =
       "# برای ساخت کد، یک ابزار انتخاب کنید...";
+
     return;
   }
 
-  const imports=new Set(
-    state.chain
-      .map(x=>x.lib)
-      .filter(x=>!["os","pathlib"].includes(x))
-  );
+  const imports = [];
 
-  let lines=[
-    ...imports.map(x=>`# import ${x}`),
+  state.chain.forEach(x => {
+
+    const line = importLine(x.lib);
+
+    if(!imports.includes(line))
+      imports.push(line);
+  });
+
+  const lines = [
+    ...imports,
     "",
-    ...state.chain.map(x=>x.tool[2])
+    ...state.chain.map(x => x.tool[2])
   ];
 
-  $("generatedCode").textContent=lines.join("\n");
+  box.textContent = lines.join("\n");
 }
 
-function preview(t,l){
-  const n=t[0];
-  let html="";
 
-  if(n==="getcwd()"){
-    html=`
-      مسیر فعلی شبیه این است:
+/* =========================================================
+   REAL CHAIN EXECUTION
+   ========================================================= */
+
+function runChain(){
+
+  if(!state.chain.length){
+
+    toast("اول چند بلوک به زنجیره اضافه کن.");
+    return;
+  }
+
+  let success = 0;
+  let failed = 0;
+
+  for(const item of state.chain){
+
+    const handled = statePreview(
+      item.tool,
+      {name:item.lib},
+      item.args || {}
+    );
+
+    if(handled)
+      success++;
+    else
+      failed++;
+  }
+
+  $("resultBody").innerHTML = `
+    <div class="live-success">
+      ✓ زنجیره اجرا شد
+    </div>
+
+    <div class="state-count">
+      ${success} مرحله شبیه‌سازی شد
+      ${failed ? ` و ${failed} مرحله فقط پیش‌نمایش شد.` : "."}
+    </div>
+
+    <p>
+      تغییرات واقعی محیط نمایشی در File Explorer قابل مشاهده است.
+    </p>
+  `;
+
+  $("resultStatus").textContent =
+    failed ? "SIMULATED ✓" : "EXECUTED ✓";
+
+  renderFileExplorer();
+
+  toast(
+    failed
+      ? "زنجیره اجرا شد؛ بعضی ابزارها فقط شبیه‌سازی شدند."
+      : "زنجیره با موفقیت اجرا شد."
+  );
+}
+
+
+/* =========================================================
+   PREVIEW
+   ========================================================= */
+
+function preview(t,l,args={}){
+
+  const n = t[0];
+  let html = "";
+
+  if(n === "getcwd()"){
+
+    html = `
+      مسیر فعلی:
       <br>
       <span class="preview-file">
         📁 <b>PythonToolkitLab</b> / demo
@@ -1024,8 +1128,9 @@ function preview(t,l){
     `;
   }
 
-  else if(n==="listdir()"){
-    html=`
+  else if(n === "listdir()"){
+
+    html = `
       <div class="preview-file">📄 students.csv</div>
       <div class="preview-file">📄 report.xlsx</div>
       <div class="preview-file">📁 data</div>
@@ -1034,20 +1139,21 @@ function preview(t,l){
   }
 
   else if(n.includes("sha256")){
-    html=`
+
+    html = `
       <div class="preview-progress">
         <i></i>
       </div>
       <p>
-        داده‌ی <b>Hello</b>
-        →
-        یک hash با طول ثابت 256-bit
+        داده‌ی <b>Hello Python</b>
+        → SHA-256
       </p>
     `;
   }
 
-  else if(n==="hexdigest()"){
-    html=`
+  else if(n === "hexdigest()"){
+
+    html = `
       <code dir="ltr">
         185f8db32271fe25f561a6fc938b2e264306ec304eda518007d1764826381969
       </code>
@@ -1060,10 +1166,14 @@ function preview(t,l){
       "DataFrame()",
       "read_csv()",
       "head()",
-      "sort_values()"
+      "tail()",
+      "sort_values()",
+      "groupby()",
+      "describe()"
     ].includes(n)
   ){
-    html=`
+
+    html = `
       <table class="preview-table">
         <tr>
           <th>name</th>
@@ -1090,26 +1200,27 @@ function preview(t,l){
   }
 
   else if(
-    [
-      "Workbook()",
-      "load_workbook()",
-      "save()"
-    ].includes(n)
+    ["Workbook()","load_workbook()","save()",
+     "create_sheet()","cell()"].includes(n)
   ){
-    html=`
+
+    html = `
       📊 <b>students.xlsx</b>
       <br>
       <span style="color:#7e8aa5">
-        Sheet1 → 2 rows → saved
+        Sheet1 → 3 rows → saved
       </span>
     `;
   }
 
   else if(
     n.includes("Observer") ||
-    ["schedule()","start()","stop()"].includes(n)
+    ["schedule()","start()","stop()",
+     "on_created()","on_deleted()",
+     "on_modified()","on_moved()"].includes(n)
   ){
-    html=`
+
+    html = `
       👁 ناظر فعال است
       <br>
       <span style="color:#31d5c8">
@@ -1118,9 +1229,11 @@ function preview(t,l){
     `;
   }
 
-  else if(n==="send2trash()"){
-    html=`
-      🗑 <b>old_file.txt</b> → Recycle Bin
+  else if(n === "send2trash()"){
+
+    html = `
+      🗑 <b>old_file.txt</b>
+      → Recycle Bin
       <br>
       <span style="color:#7e8aa5">
         فایل حذف دائمی نشده است.
@@ -1128,8 +1241,11 @@ function preview(t,l){
     `;
   }
 
-  else if(n==="fnmatch()"){
-    html=`
+  else if(
+    ["fnmatch()","filter()"].includes(n)
+  ){
+
+    html = `
       <code dir="ltr">
         fnmatch("report.xlsx", "*.xlsx")
       </code>
@@ -1139,8 +1255,9 @@ function preview(t,l){
     `;
   }
 
-  else if(n==="sleep()"){
-    html=`
+  else if(n === "sleep()"){
+
+    html = `
       ⏱ شبیه‌سازی تأخیر:
       <b>2 seconds</b>
       <br>
@@ -1150,39 +1267,39 @@ function preview(t,l){
     `;
   }
 
-  else if(n==="platform.system()"){
-    html=`
-      سیستم‌عامل:
-      <b>Windows</b>
+  else if(
+    ["platform.system()","platform.python_version()",
+     "platform.machine()","platform.processor()"].includes(n)
+  ){
+
+    html = `
+      سیستم:
+      <b>${n==="platform.system()"?"Windows":"Python / Windows"}</b>
     `;
   }
 
-  else if(n==="status_code"){
-    html=`
+  else if(n === "status_code"){
+
+    html = `
       HTTP Status:
-      <b style="color:#6ee7d8">
-        200 OK
-      </b>
+      <b style="color:#6ee7d8">200 OK</b>
     `;
   }
 
-  else if(n==="guess_type()"){
-    html=`
-      report.pdf →
-      <b>application/pdf</b>
+  else if(
+    ["guess_type()","guess_extension()"].includes(n)
+  ){
+
+    html = `
+      <code dir="ltr">
+        report.pdf → application/pdf
+      </code>
     `;
   }
 
-  else if(n==="exists()"){
-    html=`
-      Path("report.xlsx").exists()
-      →
-      <b style="color:#6ee7d8">True</b>
-    `;
-  }
+  else if(n === "disk_usage()"){
 
-  else if(n==="disk_usage()"){
-    html=`
+    html = `
       💾 Total: 512 GB
       &nbsp;
       Used: 287 GB
@@ -1191,231 +1308,199 @@ function preview(t,l){
     `;
   }
 
-  else if(n==="TemporaryDirectory()"){
-    html=`
-      📁 <b>Temp directory</b>
+  else if(
+    ["TemporaryDirectory()","TemporaryFile()",
+     "NamedTemporaryFile()","mkstemp()","mkdtemp()"].includes(n)
+  ){
+
+    html = `
+      📁 <b>Temporary resource</b>
       <br>
       <span style="color:#7e8aa5">
-        فقط برای مدت اجرای برنامه نگه داشته می‌شود.
+        منبع موقت برای اجرای برنامه ساخته شد.
       </span>
     `;
   }
 
-  else if(n==="connect()"){
-    html=`
-      🗄 SQLite connection →
-      <b>connected</b>
+  else if(
+    ["connect()","cursor()","execute()",
+     "commit()","fetchall()","fetchone()"].includes(n)
+  ){
+
+    html = `
+      🗄 SQLite
+      <br>
+      <b>simulation successful</b>
     `;
   }
 
-  else if(n==="fetchall()"){
-    html=`
-      <table class="preview-table">
-        <tr>
-          <th>id</th>
-          <th>name</th>
-        </tr>
-        <tr>
-          <td>1</td>
-          <td>Ali</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>Sara</td>
-        </tr>
-      </table>
+  else if(
+    ["PdfReader","PdfWriter","fitz.open()",
+     "convert_from_path()"].includes(n)
+  ){
+
+    html = `
+      📄 <b>PDF simulation</b>
+      <br>
+      <span style="color:#7e8aa5">
+        فایل PDF برای نمایش ارائه شبیه‌سازی شد.
+      </span>
     `;
   }
 
-  else{
-    html=`
+  else if(
+    ["Document()","add_paragraph()",
+     "add_heading()","add_table()",
+     "add_page_break()","add_picture()"].includes(n)
+  ){
+
+    html = `
+      📘 <b>Word document</b>
+      <br>
+      <span style="color:#7e8aa5">
+        عملیات Word شبیه‌سازی شد.
+      </span>
+    `;
+  }
+
+  else if(
+    ["Presentation()","add_slide()",
+     "add_textbox()","add_picture()"].includes(n)
+  ){
+
+    html = `
+      📊 <b>PowerPoint</b>
+      <br>
+      <span style="color:#7e8aa5">
+        عملیات PowerPoint شبیه‌سازی شد.
+      </span>
+    `;
+  }
+
+  else {
+
+    html = `
       <div class="preview-file">
-        ✓ ${t[1]}
+        ✓ ${escapeHtml(t[1])}
       </div>
+
       <br>
+
       <span style="color:#7e8aa5">
-        این پیش‌نمایش رفتار ابزار را در محیط ارائه شبیه‌سازی می‌کند.
+        این ابزار در محیط ارائه شبیه‌سازی شد.
       </span>
     `;
   }
 
-  $("resultBody").innerHTML=html;
-  $("resultStatus").textContent="اجرا شد ✓";
+  $("resultBody").innerHTML = html;
+  $("resultStatus").textContent = "SIMULATED ✓";
 }
 
-function runChain(){
 
-  if(!state.chain.length){
-    toast("اول چند بلوک به زنجیره اضافه کن.");
-    return;
-  }
-
-  $("resultBody").innerHTML=`
-    <div class="preview-progress">
-      <i style="width:100%"></i>
-    </div>
-    <br>
-    ✓ ${state.chain.length}
-    مرحله در زنجیره اجرا شد.
-    نتیجه‌ی هر مرحله در کد ساخته‌شده قابل مشاهده است.
-  `;
-
-  $("resultStatus").textContent="موفق ✓";
-
-  toast("زنجیره‌ی کد اجرا شد.");
-}
-
-function openModal(t,l){
-  $("modalTitle").textContent=t[0];
-  $("modalDesc").textContent=t[1];
-  $("modalSignature").textContent=t[2];
-  $("modalWhat").textContent=t[1];
-  $("modalArgs").textContent=t[3];
-  $("modalType").textContent=l.name;
-  $("modalOutput").textContent=t[4];
-
-  $("modalBackdrop").classList.add("open");
-}
-
-function closeModal(){
-  $("modalBackdrop").classList.remove("open");
-}
-
-function copyCode(){
-  navigator.clipboard?.writeText(
-    $("generatedCode").textContent
-  );
-
-  toast("کد کپی شد.");
-}
-
-function toast(msg){
-  const t=$("toast");
-
-  t.textContent=msg;
-  t.classList.add("show");
-
-  setTimeout(
-    ()=>t.classList.remove("show"),
-    1800
-  );
-}
-
-function escapeHtml(s){
-  return s.replace(
-    /[&<>"']/g,
-    m=>({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#039;"
-    }[m])
-  );
-}
-
-/* STATEFUL LIVE SIMULATOR */
-
-const VFS={
-  root:{
-    type:"folder",
-    name:"PythonLab",
-    children:[
-      {
-        type:"file",
-        name:"photo.jpg",
-        size:"2.4 MB",
-        kind:"image"
-      },
-      {
-        type:"file",
-        name:"video.mp4",
-        size:"18.7 MB",
-        kind:"video"
-      },
-      {
-        type:"file",
-        name:"report.docx",
-        size:"84 KB",
-        kind:"word"
-      },
-      {
-        type:"file",
-        name:"presentation.pptx",
-        size:"1.2 MB",
-        kind:"powerpoint"
-      }
-    ]
-  }
-};
-
-let selectedPath=null;
-let liveLog=[];
+/* =========================================================
+   VIRTUAL FILE SYSTEM HELPERS
+   ========================================================= */
 
 function resetVirtualFS(){
 
-  VFS.root.children=[
-    {
-      type:"file",
-      name:"photo.jpg",
-      size:"2.4 MB",
-      kind:"image"
-    },
-    {
-      type:"file",
-      name:"video.mp4",
-      size:"18.7 MB",
-      kind:"video"
-    },
-    {
-      type:"file",
-      name:"report.docx",
-      size:"84 KB",
-      kind:"word"
-    },
-    {
-      type:"file",
-      name:"presentation.pptx",
-      size:"1.2 MB",
-      kind:"powerpoint"
-    }
-  ];
+  VFS.root.children =
+    JSON.parse(JSON.stringify(INITIAL_FILES));
 
-  selectedPath=null;
-  liveLog=[];
+  selectedPath = null;
+  liveLog = [];
 
   renderFileExplorer();
-  renderLiveLog("محیط نمایشی به حالت اولیه برگشت.");
+  renderLiveLog(
+    "محیط نمایشی به حالت اولیه برگشت."
+  );
+
   toast("محیط فایل‌ها ریست شد.");
 }
 
+
 function iconFor(x){
 
-  if(x.type==="folder")return "📁";
-  if(x.kind==="image")return "🖼️";
-  if(x.kind==="video")return "🎬";
-  if(x.kind==="word")return "📘";
-  if(x.kind==="powerpoint")return "📙";
-  if(x.kind==="excel")return "📊";
+  if(x.type === "folder")
+    return "📁";
+
+  if(x.kind === "image")
+    return "🖼️";
+
+  if(x.kind === "video")
+    return "🎬";
+
+  if(x.kind === "word")
+    return "📘";
+
+  if(x.kind === "powerpoint")
+    return "📙";
+
+  if(x.kind === "excel")
+    return "📊";
+
+  if(x.kind === "csv")
+    return "▤";
 
   return "📄";
 }
 
-function findChild(n){
+
+function findChild(name){
+
+  if(!name) return null;
+
   return VFS.root.children.find(
-    x=>x.name===n
+    x => x.name === name
   );
 }
 
+
+function createVirtualFile(name){
+
+  const lower = name.toLowerCase();
+
+  let kind = "text";
+
+  if(/\.(jpg|jpeg|png|gif|bmp)$/.test(lower))
+    kind = "image";
+
+  else if(/\.(mp4|avi|mkv|mov)$/.test(lower))
+    kind = "video";
+
+  else if(lower.endsWith(".docx"))
+    kind = "word";
+
+  else if(lower.endsWith(".pptx"))
+    kind = "powerpoint";
+
+  else if(lower.endsWith(".xlsx"))
+    kind = "excel";
+
+  else if(lower.endsWith(".csv"))
+    kind = "csv";
+
+  return {
+    type:"file",
+    name,
+    size:"1 KB",
+    kind
+  };
+}
+
+
+/* =========================================================
+   FILE EXPLORER
+   ========================================================= */
+
 function renderFileExplorer(){
 
-  const el=document.getElementById("liveExplorer");
+  const el = document.getElementById("liveExplorer");
 
-  if(!el)return;
+  if(!el) return;
 
-  const a=VFS.root.children;
+  const a = VFS.root.children;
 
-  el.innerHTML=`
+  el.innerHTML = `
     <div class="explorer-head">
       <div>
         <span class="eyebrow">
@@ -1427,32 +1512,33 @@ function renderFileExplorer(){
       <button
         class="reset-files"
         type="button"
-        id="resetFiles"
-      >
+        id="resetFiles">
         ↻ بازنشانی
       </button>
     </div>
 
     <div class="explorer-toolbar">
       <span>
-        📁 ${a.filter(x=>x.type==="folder").length} پوشه
+        📁 ${a.filter(x => x.type==="folder").length}
+        پوشه
       </span>
 
       <span>•</span>
 
       <span>
-        📄 ${a.filter(x=>x.type==="file").length} فایل
+        📄 ${a.filter(x => x.type==="file").length}
+        فایل
       </span>
     </div>
 
     <div class="file-grid">
 
-      ${a.map(x=>
+      ${a.map(x =>
         `<button
           type="button"
           class="file-item ${selectedPath===x.name?"selected":""}"
-          data-file="${escapeHtml(x.name)}"
-        >
+          data-file="${escapeHtml(x.name)}">
+
           <span class="big-file-icon">
             ${iconFor(x)}
           </span>
@@ -1464,25 +1550,28 @@ function renderFileExplorer(){
           <span class="file-meta">
             ${
               x.type==="folder"
-              ? (x.children?.length||0)+" مورد"
-              : x.size
+                ? (x.children?.length||0)+" مورد"
+                : x.size
             }
           </span>
+
         </button>`
       ).join("")}
 
       ${
         a.length===0
-        ? '<div class="empty-files">پوشه خالی است.</div>'
-        : ""
+          ? '<div class="empty-files">پوشه خالی است.</div>'
+          : ""
       }
 
     </div>
   `;
 
-  document.querySelectorAll(".file-item").forEach(b=>{
-    b.onclick=()=>{
-      selectedPath=b.dataset.file;
+  document.querySelectorAll(".file-item").forEach(b => {
+
+    b.onclick = () => {
+
+      selectedPath = b.dataset.file;
 
       renderFileExplorer();
 
@@ -1492,9 +1581,16 @@ function renderFileExplorer(){
     };
   });
 
-  document.getElementById("resetFiles").onclick=
-    resetVirtualFS;
+  const reset = document.getElementById("resetFiles");
+
+  if(reset)
+    reset.onclick = resetVirtualFS;
 }
+
+
+/* =========================================================
+   LIVE LOG
+   ========================================================= */
 
 function renderLiveLog(msg){
 
@@ -1513,72 +1609,211 @@ function renderLiveLog(msg){
     });
   }
 
-  const e=document.getElementById("liveLog");
+  const e = document.getElementById("liveLog");
 
-  if(e){
+  if(!e) return;
 
-    e.innerHTML=
-      liveLog
-        .slice(0,7)
-        .map(x=>
-          `<div class="log-line">
-            <span>${x.time}</span>
-            <b>${escapeHtml(x.msg)}</b>
-          </div>`
-        )
-        .join("")
-      ||
-      '<div class="empty-log">هنوز دستوری اجرا نشده است.</div>';
-  }
+  e.innerHTML =
+    liveLog
+      .slice(0,7)
+      .map(x =>
+        `<div class="log-line">
+          <span>${x.time}</span>
+          <b>${escapeHtml(x.msg)}</b>
+        </div>`
+      ).join("") ||
+      `<div class="empty-log">
+        هنوز دستوری اجرا نشده است.
+      </div>`;
 }
+
+
+/* =========================================================
+   STATE PREVIEW
+   ========================================================= */
 
 function statePreview(t,l,args={}){
 
-  const n=t[0];
+  const n = t[0];
 
-  const val=(k,f="")=>
+  const val = (k,f="") =>
     Object.prototype.hasOwnProperty.call(args,k)
       ? String(args[k])
       : f;
 
-  if(n==="remove()"){
 
-    const target=
-      val("path",selectedPath||"");
+  /* ---------- OS ---------- */
 
-    const i=
-      VFS.root.children.findIndex(
-        x=>x.name===target
-      );
+  if(n === "getcwd()"){
 
-    if(i<0){
-      toast(
-        `فایل یا پوشه «${target}» پیدا نشد.`
-      );
+    $("resultBody").innerHTML = `
+      <div class="live-success">
+        📁 PythonLab
+      </div>
+      <p>
+        مسیر فعلی شبیه‌سازی:
+        <code dir="ltr">PythonLab</code>
+      </p>
+    `;
+
+    $("resultStatus").textContent =
+      "READ STATE ✓";
+
+    renderLiveLog("os.getcwd()");
+
+    return true;
+  }
+
+
+  if(n === "listdir()"){
+
+    const path = val("path",".");
+
+    $("resultBody").innerHTML = `
+      <div class="state-list">
+        ${
+          VFS.root.children.map(x =>
+            `<span>${escapeHtml(x.name)}</span>`
+          ).join("")
+        }
+      </div>
+
+      <p>
+        مسیر:
+        <code dir="ltr">
+          ${escapeHtml(path || ".")}
+        </code>
+      </p>
+    `;
+
+    $("resultStatus").textContent =
+      "READ STATE ✓";
+
+    renderLiveLog(
+      `os.listdir("${path || "."}")`
+    );
+
+    return true;
+  }
+
+
+  if(
+    n === "mkdir()" ||
+    n === "makedirs()"
+  ){
+
+    const name = val("path");
+
+    if(!name){
+
+      toast("برای ساخت پوشه، path وارد کن.");
       return true;
     }
 
-    VFS.root.children.splice(i,1);
+    const parts =
+      name
+        .split(/[\\/]+/)
+        .map(x => x.trim())
+        .filter(Boolean);
 
-    if(selectedPath===target){
-      selectedPath=null;
+    let current = VFS.root;
+
+    for(const part of parts){
+
+      let folder =
+        current.children.find(
+          x =>
+            x.type === "folder" &&
+            x.name === part
+        );
+
+      if(!folder){
+
+        folder = {
+          type:"folder",
+          name:part,
+          children:[]
+        };
+
+        current.children.push(folder);
+      }
+
+      current = folder;
     }
 
     renderFileExplorer();
 
     renderLiveLog(
-      `os.remove("${target}") → حذف شد`
+      `${n} → ${name} ساخته شد`
     );
 
-    $("resultBody").innerHTML=`
+    $("resultBody").innerHTML = `
       <div class="live-success">
-        ✓ «${escapeHtml(target)}»
-        از File Explorer نمایشی حذف شد
+        📁 ساختار «${escapeHtml(name)}» ساخته شد
       </div>
 
       <p>
         <code dir="ltr">
-          os.remove("${escapeHtml(target)}")
+          ${
+            n==="mkdir()"
+              ? `os.mkdir(${JSON.stringify(name)})`
+              : `os.makedirs(${JSON.stringify(name)})`
+          }
+        </code>
+      </p>
+    `;
+
+    $("resultStatus").textContent =
+      "FOLDER CREATED ✓";
+
+    return true;
+  }
+
+
+  if(
+    n === "remove()" ||
+    n === "unlink()"
+  ){
+
+    const target =
+      val("path",selectedPath || "");
+
+    const i =
+      VFS.root.children.findIndex(
+        x => x.name === target
+      );
+
+    if(i < 0){
+
+      toast(
+        `فایل یا پوشه «${target}» پیدا نشد.`
+      );
+
+      return true;
+    }
+
+    VFS.root.children.splice(i,1);
+
+    if(selectedPath === target)
+      selectedPath = null;
+
+    renderFileExplorer();
+
+    renderLiveLog(
+      `${n} "${target}" → حذف شد`
+    );
+
+    $("resultBody").innerHTML = `
+      <div class="live-success">
+        ✓ «${escapeHtml(target)}» حذف شد
+      </div>
+
+      <p>
+        <code dir="ltr">
+          ${n==="remove()"
+            ? `os.remove(${JSON.stringify(target)})`
+            : `Path(${JSON.stringify(target)}).unlink()`
+          }
         </code>
       </p>
 
@@ -1588,86 +1823,25 @@ function statePreview(t,l,args={}){
       </div>
     `;
 
-    $("resultStatus").textContent=
+    $("resultStatus").textContent =
       "STATE UPDATED ✓";
 
     return true;
   }
 
+
   if(
-    n==="mkdir()" ||
-    n==="makedirs()"
+    n === "rename()" ||
+    n === "replace()"
   ){
 
-    const name=val("path");
+    const target =
+      val("src",selectedPath || "");
 
-    if(!name)return true;
+    const dest =
+      val("dst","");
 
-    let f=VFS.root;
-
-    for(
-      const part of name
-        .split("/")
-        .map(x=>x.trim())
-        .filter(Boolean)
-    ){
-
-      let q=f.children.find(
-        x=>
-          x.type==="folder" &&
-          x.name===part
-      );
-
-      if(!q){
-
-        q={
-          type:"folder",
-          name:part,
-          children:[]
-        };
-
-        f.children.push(q);
-      }
-
-      f=q;
-    }
-
-    renderFileExplorer();
-
-    renderLiveLog(
-      `${n} → ${name} ساخته شد`
-    );
-
-    $("resultBody").innerHTML=`
-      <div class="live-success">
-        📁 ساختار «${escapeHtml(name)}» ساخته شد
-      </div>
-
-      <p>
-        <code dir="ltr">
-          os.${
-            n==="mkdir()"
-            ? `mkdir(${JSON.stringify(name)})`
-            : `makedirs(${JSON.stringify(name)})`
-          }
-        </code>
-      </p>
-    `;
-
-    $("resultStatus").textContent=
-      "FOLDER CREATED ✓";
-
-    return true;
-  }
-
-  if(n==="rename()"){
-
-    const target=
-      val("src",selectedPath||"");
-
-    const dest=val("dst");
-
-    const x=findChild(target);
+    const x = findChild(target);
 
     if(!x){
 
@@ -1678,10 +1852,15 @@ function statePreview(t,l,args={}){
       return true;
     }
 
-    if(!dest)return true;
+    if(!dest){
 
-    x.name=dest;
-    selectedPath=dest;
+      toast("مقصد را وارد کن.");
+      return true;
+    }
+
+    x.name = dest;
+
+    selectedPath = dest;
 
     renderFileExplorer();
 
@@ -1689,135 +1868,251 @@ function statePreview(t,l,args={}){
       `${target} → ${dest}`
     );
 
-    $("resultBody").innerHTML=`
+    $("resultBody").innerHTML = `
       <div class="live-success">
         ✓ «${escapeHtml(target)}»
-        به «${escapeHtml(dest)}»
-        تغییر نام داد
+        به «${escapeHtml(dest)}» تغییر کرد
       </div>
 
       <p>
         <code dir="ltr">
-          os.rename(
-            ${JSON.stringify(target)},
-            ${JSON.stringify(dest)}
-          )
+          ${
+            n==="rename()"
+              ? `os.rename(${JSON.stringify(target)}, ${JSON.stringify(dest)})`
+              : `os.replace(${JSON.stringify(target)}, ${JSON.stringify(dest)})`
+          }
         </code>
       </p>
     `;
 
-    $("resultStatus").textContent=
+    $("resultStatus").textContent =
       "RENAMED ✓";
 
     return true;
   }
 
-  if(n==="listdir()"){
 
-    const path=val("path","");
+  if(
+    ["isfile()","isdir()"].includes(n)
+  ){
 
-    $("resultBody").innerHTML=`
+    const target =
+      val("path",selectedPath || "");
+
+    const x = findChild(target);
+
+    const result =
+      n === "isfile()"
+        ? !!x && x.type === "file"
+        : !!x && x.type === "folder";
+
+    $("resultBody").innerHTML = `
+      <code dir="ltr">
+        ${n}("${escapeHtml(target)}")
+      </code>
+
+      <br>
+
+      <b class="${result?"live-true":""}">
+        ${result}
+      </b>
+    `;
+
+    $("resultStatus").textContent =
+      "READ STATE ✓";
+
+    return true;
+  }
+
+
+  if(
+    ["abspath()","basename()","dirname()","join()"].includes(n)
+  ){
+
+    const target =
+      val("path",selectedPath || "");
+
+    let result = "";
+
+    if(n === "abspath()")
+      result = `C:/PythonLab/${target}`;
+
+    else if(n === "basename()")
+      result = target.split(/[\\/]/).pop();
+
+    else if(n === "dirname()")
+      result = target.split(/[\\/]/).slice(0,-1).join("/") || ".";
+
+    else
+      result = "PythonLab/" + target;
+
+    $("resultBody").innerHTML = `
+      <code dir="ltr">${escapeHtml(result)}</code>
+    `;
+
+    $("resultStatus").textContent =
+      "CALCULATED ✓";
+
+    return true;
+  }
+
+
+  if(n === "getsize()"){
+
+    const target =
+      val("path",selectedPath || "");
+
+    const x = findChild(target);
+
+    $("resultBody").innerHTML = `
+      <b>
+        ${
+          x
+            ? x.size
+            : "File not found"
+        }
+      </b>
+    `;
+
+    $("resultStatus").textContent =
+      "READ STATE ✓";
+
+    return true;
+  }
+
+
+  /* ---------- PATHLIB ---------- */
+
+  if(
+    ["exists()","is_file()","is_dir()"].includes(n)
+  ){
+
+    const target =
+      val("path",selectedPath || "");
+
+    const x = findChild(target);
+
+    let result = false;
+
+    if(n === "exists()")
+      result = !!x;
+
+    if(n === "is_file()")
+      result = !!x && x.type === "file";
+
+    if(n === "is_dir()")
+      result = !!x && x.type === "folder";
+
+    $("resultBody").innerHTML = `
+      <code dir="ltr">
+        Path(${JSON.stringify(target)}).${n}
+      </code>
+
+      <br>
+
+      <b class="live-true">
+        ${result}
+      </b>
+    `;
+
+    $("resultStatus").textContent =
+      "READ STATE ✓";
+
+    return true;
+  }
+
+
+  if(n === "glob()"){
+
+    const pattern =
+      val("pattern","*.txt");
+
+    const matches =
+      VFS.root.children
+        .filter(x =>
+          simplePatternMatch(
+            x.name,
+            pattern
+          )
+        )
+        .map(x => x.name);
+
+    $("resultBody").innerHTML = `
+      <div class="state-list">
+        ${
+          matches.length
+            ? matches.map(x =>
+                `<span>${escapeHtml(x)}</span>`
+              ).join("")
+            : "<span>موردی پیدا نشد.</span>"
+        }
+      </div>
+    `;
+
+    $("resultStatus").textContent =
+      "SEARCHED ✓";
+
+    return true;
+  }
+
+
+  if(n === "iterdir()"){
+
+    $("resultBody").innerHTML = `
       <div class="state-list">
         ${
           VFS.root.children
-            .map(x=>
+            .map(x =>
               `<span>${escapeHtml(x.name)}</span>`
             )
             .join("")
         }
       </div>
-
-      <p>
-        مسیر انتخابی:
-        <code dir="ltr">
-          ${escapeHtml(path||".")}
-        </code>
-      </p>
     `;
 
-    $("resultStatus").textContent=
+    $("resultStatus").textContent =
       "READ STATE ✓";
 
     return true;
   }
 
-  if(n==="exists()"){
-
-    const target=
-      val("path",selectedPath||"");
-
-    $("resultBody").innerHTML=`
-      <code dir="ltr">
-        Path(${JSON.stringify(target)}).exists()
-      </code>
-      <br>
-      <b class="live-true">
-        ${findChild(target)?"True":"False"}
-      </b>
-    `;
-
-    $("resultStatus").textContent=
-      "READ STATE ✓";
-
-    return true;
-  }
-
-  if(n==="send2trash()"){
-
-    const target=
-      val("path",selectedPath||"");
-
-    const i=
-      VFS.root.children.findIndex(
-        x=>x.name===target
-      );
-
-    if(i<0){
-
-      toast(
-        `«${target}» پیدا نشد.`
-      );
-
-      return true;
-    }
-
-    VFS.root.children.splice(i,1);
-    selectedPath=null;
-
-    renderFileExplorer();
-
-    renderLiveLog(
-      `send2trash("${target}") → انتقال به سطل زباله`
-    );
-
-    $("resultBody").innerHTML=`
-      <div class="live-success">
-        ♻ «${escapeHtml(target)}»
-        به سطل زباله‌ی نمایشی منتقل شد
-      </div>
-
-      <p>
-        <code dir="ltr">
-          send2trash(${JSON.stringify(target)})
-        </code>
-      </p>
-    `;
-
-    $("resultStatus").textContent=
-      "TRASHED ✓";
-
-    return true;
-  }
 
   if(
-    n==="copy()" ||
-    n==="move()"
+    ["suffix","name"].includes(n)
   ){
 
-    const src=val("src");
-    const dst=val("dst");
+    const target =
+      val("path",selectedPath || "");
 
-    const x=findChild(src);
+    const result =
+      n === "suffix"
+        ? "." + (target.split(".").pop() || "")
+        : target.split(/[\\/]/).pop();
+
+    $("resultBody").innerHTML = `
+      <code dir="ltr">${escapeHtml(result)}</code>
+    `;
+
+    $("resultStatus").textContent =
+      "CALCULATED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- SHUTIL ---------- */
+
+  if(
+    ["copy()","copy2()","move()"].includes(n)
+  ){
+
+    const src =
+      val("src",selectedPath || "");
+
+    const dst =
+      val("dst","");
+
+    const x = findChild(src);
 
     if(!x){
 
@@ -1828,24 +2123,32 @@ function statePreview(t,l,args={}){
       return true;
     }
 
-    if(!dst)return true;
+    if(!dst){
 
-    const copy=
-      JSON.parse(
-        JSON.stringify(x)
-      );
+      toast("مقصد را وارد کن.");
+      return true;
+    }
 
-    copy.name=
-      dst.split("/").pop();
+    const newName =
+      dst.split(/[\\/]/).pop();
 
-    if(n==="copy()"){
+    if(n === "move()"){
 
-      VFS.root.children.push(copy);
+      x.name = newName;
 
     }else{
 
-      x.name=copy.name;
+      const copy =
+        JSON.parse(
+          JSON.stringify(x)
+        );
+
+      copy.name = newName;
+
+      VFS.root.children.push(copy);
     }
+
+    selectedPath = newName;
 
     renderFileExplorer();
 
@@ -1853,42 +2156,78 @@ function statePreview(t,l,args={}){
       `${n} ${src} → ${dst}`
     );
 
-    $("resultBody").innerHTML=`
+    $("resultBody").innerHTML = `
       <div class="live-success">
         ✓ ${
-          n==="copy()"
-          ? "یک کپی ایجاد شد"
-          : "آیتم جابه‌جا شد"
+          n==="move()"
+            ? "آیتم جابه‌جا شد"
+            : "یک کپی ایجاد شد"
         }
       </div>
 
       <p>
         <code dir="ltr">
-          shutil.${n}
+          shutil.${n.slice(0,-2)}
           (${JSON.stringify(src)},
-          ${JSON.stringify(dst)})
+           ${JSON.stringify(dst)})
         </code>
       </p>
     `;
 
-    $("resultStatus").textContent=
+    $("resultStatus").textContent =
       "STATE UPDATED ✓";
 
     return true;
   }
 
-  if(n==="rmtree()"){
 
-    const target=val("path");
+  if(n === "copytree()"){
 
-    const i=
+    const src =
+      val("src","Demo");
+
+    const dst =
+      val("dst","DemoCopy");
+
+    const folder = {
+      type:"folder",
+      name:dst.split(/[\\/]/).pop(),
+      children:[]
+    };
+
+    VFS.root.children.push(folder);
+
+    renderFileExplorer();
+
+    renderLiveLog(
+      `shutil.copytree("${src}","${dst}")`
+    );
+
+    $("resultBody").innerHTML = `
+      <div class="live-success">
+        📁 پوشه «${escapeHtml(dst)}» کپی شد.
+      </div>
+    `;
+
+    $("resultStatus").textContent =
+      "FOLDER COPIED ✓";
+
+    return true;
+  }
+
+
+  if(n === "rmtree()"){
+
+    const target = val("path");
+
+    const i =
       VFS.root.children.findIndex(
-        x=>
-          x.name===target &&
-          x.type==="folder"
+        x =>
+          x.name === target &&
+          x.type === "folder"
       );
 
-    if(i<0){
+    if(i < 0){
 
       toast(
         `پوشه «${target}» پیدا نشد.`
@@ -1899,71 +2238,888 @@ function statePreview(t,l,args={}){
 
     VFS.root.children.splice(i,1);
 
-    selectedPath=null;
+    selectedPath = null;
 
     renderFileExplorer();
 
     renderLiveLog(
-      `shutil.rmtree("${target}") → حذف پوشه`
+      `shutil.rmtree("${target}")`
     );
 
-    $("resultBody").innerHTML=`
+    $("resultBody").innerHTML = `
       <div class="live-success">
         ✓ پوشه «${escapeHtml(target)}»
-        و محتویات نمایشی آن حذف شد
+        و محتویات نمایشی آن حذف شد.
       </div>
     `;
 
-    $("resultStatus").textContent=
+    $("resultStatus").textContent =
       "STATE UPDATED ✓";
 
     return true;
   }
 
-  if(n==="fnmatch()"){
 
-    const name=val("name");
-    const pattern=val(
-      "pattern",
-      "*.txt"
-    );
+  if(n === "which()"){
 
-    const regex=
-      new RegExp(
-        "^"+
-        pattern
-          .replace(
-            /[.+^${}()|[\]\\]/g,
-            "\\$&"
-          )
-          .replace(/\*/g,".*")
-          .replace(/\?/g,".")
-        +"$"
+    const cmd = val("cmd","python");
+
+    $("resultBody").innerHTML = `
+      <code dir="ltr">
+        C:/Python311/${escapeHtml(cmd)}.exe
+      </code>
+    `;
+
+    $("resultStatus").textContent =
+      "SIMULATED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- SEND2TRASH ---------- */
+
+  if(n === "send2trash()"){
+
+    const target =
+      val("path",selectedPath || "");
+
+    const i =
+      VFS.root.children.findIndex(
+        x => x.name === target
       );
 
-    $("resultBody").innerHTML=`
+    if(i < 0){
+
+      toast(
+        `«${target}» پیدا نشد.`
+      );
+
+      return true;
+    }
+
+    VFS.root.children.splice(i,1);
+
+    selectedPath = null;
+
+    renderFileExplorer();
+
+    renderLiveLog(
+      `send2trash("${target}") → سطل زباله`
+    );
+
+    $("resultBody").innerHTML = `
+      <div class="live-success">
+        ♻ «${escapeHtml(target)}»
+        به سطل زباله نمایشی منتقل شد.
+      </div>
+    `;
+
+    $("resultStatus").textContent =
+      "TRASHED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- FNMATCH ---------- */
+
+  if(n === "fnmatch()"){
+
+    const name = val("name","");
+    const pattern = val("pattern","*.txt");
+
+    const result =
+      simplePatternMatch(name,pattern);
+
+    $("resultBody").innerHTML = `
       <code dir="ltr">
         fnmatch(
-          ${JSON.stringify(name)},
-          ${JSON.stringify(pattern)}
+        ${JSON.stringify(name)},
+        ${JSON.stringify(pattern)}
         )
       </code>
 
       <br>
 
       نتیجه:
-      <b style="color:#6ee7d8">
-        ${regex.test(name)}
+      <b class="live-true">
+        ${result}
       </b>
     `;
 
-    $("resultStatus").textContent=
+    $("resultStatus").textContent =
       "EXECUTED ✓";
 
     return true;
   }
 
+
+  if(n === "filter()"){
+
+    const pattern =
+      val("pattern","*.txt");
+
+    const names =
+      VFS.root.children
+        .map(x => x.name)
+        .filter(x =>
+          simplePatternMatch(
+            x,
+            pattern
+          )
+        );
+
+    $("resultBody").innerHTML = `
+      <div class="state-list">
+        ${
+          names.length
+            ? names.map(x =>
+                `<span>${escapeHtml(x)}</span>`
+              ).join("")
+            : "<span>موردی پیدا نشد.</span>"
+        }
+      </div>
+    `;
+
+    $("resultStatus").textContent =
+      "FILTERED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- FILECMP ---------- */
+
+  if(
+    ["cmp()","samefile()"].includes(n)
+  ){
+
+    const f1 = val("f1","");
+    const f2 = val("f2","");
+
+    const result =
+      f1 === f2;
+
+    $("resultBody").innerHTML = `
+      <code dir="ltr">
+        ${escapeHtml(f1)}
+        ↔
+        ${escapeHtml(f2)}
+      </code>
+
+      <br>
+
+      نتیجه:
+      <b>${result}</b>
+    `;
+
+    $("resultStatus").textContent =
+      "COMPARED ✓";
+
+    return true;
+  }
+
+
+  if(n === "dircmp()"){
+
+    $("resultBody").innerHTML = `
+      <div class="live-success">
+        ≋ ساختار دو پوشه مقایسه شد.
+      </div>
+    `;
+
+    $("resultStatus").textContent =
+      "COMPARED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- HASHLIB ---------- */
+
+  if(
+    ["sha256()","sha512()","sha1()","md5()"].includes(n)
+  ){
+
+    const data =
+      val("data","Hello Python");
+
+    const lengths = {
+      "sha256()":64,
+      "sha512()":128,
+      "sha1()":40,
+      "md5()":32
+    };
+
+    const len = lengths[n];
+
+    const fakeHash =
+      makeFakeHash(data,len);
+
+    $("resultBody").innerHTML = `
+      <div class="preview-progress">
+        <i style="width:100%"></i>
+      </div>
+
+      <p>
+        الگوریتم:
+        <b>${escapeHtml(n)}</b>
+      </p>
+
+      <code dir="ltr">
+        ${fakeHash}
+      </code>
+    `;
+
+    $("resultStatus").textContent =
+      "HASH CREATED ✓";
+
+    return true;
+  }
+
+
+  if(n === "hexdigest()"){
+
+    $("resultBody").innerHTML = `
+      <code dir="ltr">
+        185f8db32271fe25f561a6fc938b2e264306ec304eda518007d1764826381969
+      </code>
+    `;
+
+    $("resultStatus").textContent =
+      "HASH DISPLAYED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- MIMETYPES ---------- */
+
+  if(n === "guess_type()"){
+
+    const filename =
+      val("url",selectedPath || "report.pdf");
+
+    const ext =
+      filename.toLowerCase().split(".").pop();
+
+    const map = {
+      pdf:"application/pdf",
+      txt:"text/plain",
+      html:"text/html",
+      css:"text/css",
+      js:"text/javascript",
+      json:"application/json",
+      csv:"text/csv",
+      jpg:"image/jpeg",
+      jpeg:"image/jpeg",
+      png:"image/png",
+      mp3:"audio/mpeg",
+      mp4:"video/mp4",
+      docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      xlsx:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      pptx:"application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    };
+
+    $("resultBody").innerHTML = `
+      <code dir="ltr">
+        ${escapeHtml(filename)}
+      </code>
+      →
+      <b>${map[ext] || "unknown"}</b>
+    `;
+
+    $("resultStatus").textContent =
+      "MIME DETECTED ✓";
+
+    return true;
+  }
+
+
+  if(n === "guess_extension()"){
+
+    const type =
+      val("type","application/pdf");
+
+    const map = {
+      "application/pdf":".pdf",
+      "text/plain":".txt",
+      "text/html":".html",
+      "text/css":".css",
+      "application/json":".json",
+      "image/jpeg":".jpg",
+      "image/png":".png",
+      "audio/mpeg":".mp3",
+      "video/mp4":".mp4"
+    };
+
+    $("resultBody").innerHTML = `
+      <b>${map[type] || ".bin"}</b>
+    `;
+
+    $("resultStatus").textContent =
+      "EXTENSION FOUND ✓";
+
+    return true;
+  }
+
+
+  /* ---------- TEMPFILE ---------- */
+
+  if(
+    ["TemporaryDirectory()","TemporaryFile()",
+     "NamedTemporaryFile()","mkstemp()","mkdtemp()"].includes(n)
+  ){
+
+    const name =
+      n.includes("Directory")
+        ? "tmp_python_lab"
+        : "tmp_file.tmp";
+
+    $("resultBody").innerHTML = `
+      <div class="live-success">
+        ✓ منبع موقت ساخته شد
+      </div>
+
+      <code dir="ltr">
+        ${name}
+      </code>
+    `;
+
+    $("resultStatus").textContent =
+      "TEMP CREATED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- TIME ---------- */
+
+  if(n === "sleep()"){
+
+    const seconds =
+      Number(val("seconds","2"));
+
+    $("resultBody").innerHTML = `
+      ⏱ تأخیر شبیه‌سازی‌شده:
+      <b>${seconds} ثانیه</b>
+
+      <div class="preview-progress">
+        <i style="width:100%"></i>
+      </div>
+    `;
+
+    $("resultStatus").textContent =
+      "SIMULATED ✓";
+
+    return true;
+  }
+
+
+  if(
+    ["time()","perf_counter()","monotonic()"].includes(n)
+  ){
+
+    $("resultBody").innerHTML = `
+      <code dir="ltr">
+        ${(performance.now()/1000).toFixed(6)}
+      </code>
+    `;
+
+    $("resultStatus").textContent =
+      "TIME READ ✓";
+
+    return true;
+  }
+
+
+  if(n === "ctime()"){
+
+    $("resultBody").innerHTML =
+      `<b>${new Date().toString()}</b>`;
+
+    $("resultStatus").textContent =
+      "TIME CONVERTED ✓";
+
+    return true;
+  }
+
+
+  if(n === "strftime()"){
+
+    $("resultBody").innerHTML =
+      `<b>${new Date().toLocaleString("fa-IR")}</b>`;
+
+    $("resultStatus").textContent =
+      "FORMATTED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- SYS / PLATFORM ---------- */
+
+  if(
+    ["platform.system()",
+     "platform.python_version()",
+     "platform.machine()",
+     "platform.processor()",
+     "sys.version",
+     "sys.platform",
+     "sys.executable",
+     "sys.argv"].includes(n)
+  ){
+
+    const values = {
+      "platform.system()":"Windows",
+      "platform.python_version()":"3.11.x",
+      "platform.machine()":"AMD64",
+      "platform.processor()":"PythonLab CPU",
+      "sys.version":"3.11.x",
+      "sys.platform":"win32",
+      "sys.executable":"C:/Python311/python.exe",
+      "sys.argv":"['main.py']"
+    };
+
+    $("resultBody").innerHTML = `
+      <code dir="ltr">
+        ${escapeHtml(values[n])}
+      </code>
+    `;
+
+    $("resultStatus").textContent =
+      "SYSTEM INFO ✓";
+
+    return true;
+  }
+
+
+  /* ---------- SQLITE ---------- */
+
+  if(
+    ["connect()","cursor()","execute()",
+     "executemany()","fetchone()",
+     "fetchall()","commit()",
+     "rollback()","close()"].includes(n)
+  ){
+
+    $("resultBody").innerHTML = `
+      <div class="live-success">
+        🗄 SQLite operation simulated successfully.
+      </div>
+
+      <table class="preview-table">
+        <tr>
+          <th>id</th>
+          <th>name</th>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>Ali</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Sara</td>
+        </tr>
+      </table>
+    `;
+
+    $("resultStatus").textContent =
+      "SQL SIMULATED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- PANDAS ---------- */
+
+  if(
+    ["read_csv()","read_excel()","DataFrame()",
+     "head()","tail()","sort_values()",
+     "groupby()","describe()","info()"].includes(n)
+  ){
+
+    $("resultBody").innerHTML = `
+      <table class="preview-table">
+
+        <tr>
+          <th>name</th>
+          <th>score</th>
+          <th>city</th>
+        </tr>
+
+        <tr>
+          <td>Ali</td>
+          <td>20</td>
+          <td>Tehran</td>
+        </tr>
+
+        <tr>
+          <td>Sara</td>
+          <td>18</td>
+          <td>Yazd</td>
+        </tr>
+
+        <tr>
+          <td>Reza</td>
+          <td>19</td>
+          <td>Tabriz</td>
+        </tr>
+
+      </table>
+    `;
+
+    $("resultStatus").textContent =
+      "DATAFRAME SIMULATED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- EXCEL ---------- */
+
+  if(
+    ["Workbook()","load_workbook()",
+     "active","cell()","append()",
+     "save()","create_sheet()",
+     "remove()","max_row",
+     "max_column"].includes(n)
+  ){
+
+    $("resultBody").innerHTML = `
+      📊 <b>students.xlsx</b>
+
+      <br>
+
+      <span style="color:#7e8aa5">
+        Sheet1 → 3 rows → 3 columns
+      </span>
+    `;
+
+    $("resultStatus").textContent =
+      "EXCEL SIMULATED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- IO ---------- */
+
+  if(
+    ["StringIO()","BytesIO()",
+     "read()","write()",
+     "seek()","tell()",
+     "getvalue()"].includes(n)
+  ){
+
+    $("resultBody").innerHTML = `
+      <div class="live-success">
+        ↯ عملیات جریان داده انجام شد.
+      </div>
+
+      <code dir="ltr">
+        Hello Python
+      </code>
+    `;
+
+    $("resultStatus").textContent =
+      "STREAM SIMULATED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- WATCHDOG ---------- */
+
+  if(
+    ["Observer","schedule()","start()",
+     "stop()","join()",
+     "on_created()","on_deleted()",
+     "on_modified()","on_moved()"].includes(n)
+  ){
+
+    $("resultBody").innerHTML = `
+      👁 <b>File watcher active</b>
+
+      <br>
+
+      <span style="color:#31d5c8">
+        event: modified → report.xlsx
+      </span>
+    `;
+
+    $("resultStatus").textContent =
+      "WATCHER SIMULATED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- SCHEDULE ---------- */
+
+  if(
+    ["every()","seconds","minutes",
+     "hours","days","weeks",
+     "do()","run_pending()",
+     "clear()","cancel_job()"].includes(n)
+  ){
+
+    $("resultBody").innerHTML = `
+      ◷ <b>Scheduled Job</b>
+
+      <br>
+
+      <span style="color:#31d5c8">
+        job registered successfully
+      </span>
+    `;
+
+    $("resultStatus").textContent =
+      "SCHEDULED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- REQUESTS / HTTPX ---------- */
+
+  if(
+    ["get()","post()","put()",
+     "delete()","request()"].includes(n)
+  ){
+
+    $("resultBody").innerHTML = `
+      <div class="live-success">
+        🌐 HTTP request simulated
+      </div>
+
+      <p>
+        Status:
+        <b style="color:#6ee7d8">
+          200 OK
+        </b>
+      </p>
+    `;
+
+    $("resultStatus").textContent =
+      "HTTP SIMULATED ✓";
+
+    return true;
+  }
+
+
+  if(
+    ["status_code","json()","text",
+     "headers","raise_for_status()"].includes(n)
+  ){
+
+    $("resultBody").innerHTML = `
+      <code dir="ltr">
+        ${
+          n==="status_code"
+            ? "200"
+            : n==="json()"
+              ? '{"status":"ok"}'
+              : n==="text"
+                ? "Hello from server"
+                : '{"Content-Type":"application/json"}'
+        }
+      </code>
+    `;
+
+    $("resultStatus").textContent =
+      "RESPONSE READ ✓";
+
+    return true;
+  }
+
+
+  /* ---------- DOCX ---------- */
+
+  if(
+    ["Document()","add_paragraph()",
+     "add_heading()","add_table()",
+     "add_page_break()","add_picture()",
+     "save()"].includes(n)
+  ){
+
+    $("resultBody").innerHTML = `
+      📘 <b>Word Document</b>
+
+      <br>
+
+      <span style="color:#7e8aa5">
+        عملیات Word با موفقیت شبیه‌سازی شد.
+      </span>
+    `;
+
+    $("resultStatus").textContent =
+      "WORD SIMULATED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- PPTX ---------- */
+
+  if(
+    ["Presentation()","add_slide()",
+     "add_textbox()","add_picture()",
+     "slide_layouts"].includes(n)
+  ){
+
+    $("resultBody").innerHTML = `
+      📊 <b>PowerPoint Presentation</b>
+
+      <br>
+
+      <span style="color:#7e8aa5">
+        عملیات PowerPoint شبیه‌سازی شد.
+      </span>
+    `;
+
+    $("resultStatus").textContent =
+      "PPTX SIMULATED ✓";
+
+    return true;
+  }
+
+
+  /* ---------- DEFAULT ---------- */
+
   return false;
 }
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function simplePatternMatch(name,pattern){
+
+  const escaped =
+    pattern
+      .replace(/[.+^${}()|[\]\\]/g,"\\$&")
+      .replace(/\*/g,".*")
+      .replace(/\?/g,".");
+
+  return new RegExp(
+    "^" + escaped + "$",
+    "i"
+  ).test(name);
+}
+
+
+function makeFakeHash(text,length){
+
+  let seed = 0;
+
+  for(let i=0;i<text.length;i++)
+    seed = (seed * 31 + text.charCodeAt(i)) >>> 0;
+
+  let result = "";
+
+  for(let i=0;i<length;i++){
+
+    seed =
+      (seed * 1664525 + 1013904223)
+      >>> 0;
+
+    result +=
+      (seed % 16).toString(16);
+  }
+
+  return result;
+}
+
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+function openModal(t,l){
+
+  $("modalTitle").textContent = t[0];
+  $("modalDesc").textContent = t[1];
+  $("modalSignature").textContent = t[2];
+  $("modalWhat").textContent = t[1];
+  $("modalArgs").textContent = t[3];
+  $("modalType").textContent = l.name;
+  $("modalOutput").textContent = t[4];
+
+  $("modalBackdrop").classList.add("open");
+}
+
+
+function closeModal(){
+
+  $("modalBackdrop").classList.remove("open");
+}
+
+
+/* =========================================================
+   COPY
+   ========================================================= */
+
+function copyCode(){
+
+  const text =
+    $("generatedCode")?.textContent || "";
+
+  if(navigator.clipboard){
+
+    navigator.clipboard
+      .writeText(text)
+      .then(() => toast("کد کپی شد."))
+      .catch(() => toast("کپی انجام نشد."));
+  }
+
+  else {
+
+    toast("مرورگر اجازه کپی خودکار نداد.");
+  }
+}
+
+
+/* =========================================================
+   UI
+   ========================================================= */
+
+function toast(msg){
+
+  const t = $("toast");
+
+  if(!t) return;
+
+  t.textContent = msg;
+
+  t.classList.add("show");
+
+  setTimeout(
+    () => t.classList.remove("show"),
+    1800
+  );
+}
+
+
+function escapeHtml(s){
+
+  return String(s).replace(
+    /[&<>"']/g,
+    m => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[m])
+  );
+}
+
+
+/* =========================================================
+   START
+   ========================================================= */
 
 init();
