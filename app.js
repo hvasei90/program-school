@@ -257,11 +257,7 @@ function selectLib(id){
   document.querySelectorAll(".help-btn").forEach(b=>b.onclick=e=>{e.stopPropagation();openModal(l.tools[+b.dataset.help],l)});
   renderNav(); renderCards(); $("labSection").scrollIntoView({behavior:"smooth",block:"start"});
 }
-function addTool(t,l){
-  state.chain.push({lib:l.name,tool:t});
-  renderChain();
-  preview(t,l);
-}
+function addTool(t,l){state.chain.push({lib:l.name,tool:t});renderChain();if(!statePreview(t,l))preview(t,l)}
 function renderChain(){
   const c=$("chain");
   if(!state.chain.length){c.className="chain empty";c.innerHTML=`<div class="empty-chain"><div class="drop-icon">＋</div><b>بلوک‌ها را اینجا جمع کن</b><span>با کلیک روی هر ابزار، یک بلوک به کد اضافه می‌شود.</span></div>`;generateCode();return;}
@@ -318,4 +314,27 @@ function copyCode(){
 }
 function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800)}
 function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+/* STATEFUL LIVE SIMULATOR */
+const VFS={root:{type:"folder",name:"PythonLab",children:[
+ {type:"file",name:"photo.jpg",size:"2.4 MB",kind:"image"},
+ {type:"file",name:"video.mp4",size:"18.7 MB",kind:"video"},
+ {type:"file",name:"report.docx",size:"84 KB",kind:"word"},
+ {type:"file",name:"presentation.pptx",size:"1.2 MB",kind:"powerpoint"}
+]}};
+let selectedPath=null,liveLog=[];
+function resetVirtualFS(){VFS.root.children=[
+ {type:"file",name:"photo.jpg",size:"2.4 MB",kind:"image"},{type:"file",name:"video.mp4",size:"18.7 MB",kind:"video"},{type:"file",name:"report.docx",size:"84 KB",kind:"word"},{type:"file",name:"presentation.pptx",size:"1.2 MB",kind:"powerpoint"}
+];selectedPath=null;liveLog=[];renderFileExplorer();renderLiveLog("محیط نمایشی به حالت اولیه برگشت.");toast("محیط فایل‌ها ریست شد.")}
+function iconFor(x){if(x.type==="folder")return "📁";if(x.kind==="image")return "🖼️";if(x.kind==="video")return "🎬";if(x.kind==="word")return "📘";if(x.kind==="powerpoint")return "📙";if(x.kind==="excel")return "📊";return "📄"}
+function findChild(n){return VFS.root.children.find(x=>x.name===n)}
+function renderFileExplorer(){const el=document.getElementById("liveExplorer");if(!el)return;const a=VFS.root.children;el.innerHTML=`<div class="explorer-head"><div><span class="eyebrow">VIRTUAL FILE EXPLORER</span><b>PythonLab /</b></div><button class="reset-files" type="button" id="resetFiles">↻ بازنشانی</button></div><div class="explorer-toolbar"><span>📁 ${a.filter(x=>x.type==="folder").length} پوشه</span><span>•</span><span>📄 ${a.filter(x=>x.type==="file").length} فایل</span></div><div class="file-grid">${a.map(x=>`<button type="button" class="file-item ${selectedPath===x.name?"selected":""}" data-file="${escapeHtml(x.name)}"><span class="big-file-icon">${iconFor(x)}</span><span class="file-name">${escapeHtml(x.name)}</span><span class="file-meta">${x.type==="folder"?(x.children?.length||0)+" مورد":x.size}</span></button>`).join("")}${a.length===0?'<div class="empty-files">پوشه خالی است.</div>':''}</div>`;document.querySelectorAll(".file-item").forEach(b=>b.onclick=()=>{selectedPath=b.dataset.file;renderFileExplorer();renderLiveLog(`انتخاب شد: ${b.dataset.file}`)});document.getElementById("resetFiles").onclick=resetVirtualFS}
+function renderLiveLog(msg){if(msg)liveLog.unshift({time:new Date().toLocaleTimeString("fa-IR",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),msg});const e=document.getElementById("liveLog");if(e)e.innerHTML=liveLog.slice(0,7).map(x=>`<div class="log-line"><span>${x.time}</span><b>${escapeHtml(x.msg)}</b></div>`).join("")||'<div class="empty-log">هنوز دستوری اجرا نشده است.</div>'}
+function statePreview(t){const n=t[0];
+ if(n==="remove()"){const target=selectedPath||"presentation.pptx",i=VFS.root.children.findIndex(x=>x.name===target);if(i<0){toast("فایل پیدا نشد.");return true}VFS.root.children.splice(i,1);renderFileExplorer();renderLiveLog(`os.remove("${target}") → حذف شد`);$("resultBody").innerHTML=`<div class="live-success">✓ فایل از File Explorer نمایشی حذف شد</div><p><code dir="ltr">os.remove("${escapeHtml(target)}")</code></p><div class="state-count">اکنون ${VFS.root.children.length} آیتم باقی مانده است.</div>`;$("resultStatus").textContent="STATE UPDATED ✓";return true}
+ if(n==="mkdir()"||n==="makedirs()"){const name=prompt(n==="mkdir()"?"نام پوشه:":"مسیر پوشه‌های تو‌در‌تو:",n==="mkdir()"?"new_folder":"project/data/output");if(name!==null){let f=VFS.root;for(const part of name.split("/").map(x=>x.trim()).filter(Boolean)){let q=f.children.find(x=>x.type==="folder"&&x.name===part);if(!q){q={type:"folder",name:part,children:[]};f.children.push(q)}f=q}renderFileExplorer();renderLiveLog(`${n} → ${name} ساخته شد`);$("resultBody").innerHTML=`<div class="live-success">📁 ساختار پوشه ساخته شد</div><p><code dir="ltr">os.${n==="mkdir()"?`mkdir("${escapeHtml(name)}")`:`makedirs("${escapeHtml(name)}")`}</code></p>`;$("resultStatus").textContent="FOLDER CREATED ✓"}return true}
+ if(n==="rename()"){const target=selectedPath||"presentation.pptx",x=findChild(target);if(!x){toast("اول یک فایل را انتخاب کن.");return true}const name=prompt("نام جدید:",target);if(name&&name.trim()){x.name=name.trim();selectedPath=x.name;renderFileExplorer();renderLiveLog(`${target} → ${x.name}`);$("resultBody").innerHTML=`<div class="live-success">✓ نام فایل تغییر کرد</div><p><code dir="ltr">os.rename("${escapeHtml(target)}","${escapeHtml(x.name)}")</code></p>`;$("resultStatus").textContent="RENAMED ✓"}return true}
+ if(n==="listdir()"){$("resultBody").innerHTML=`<div class="state-list">${VFS.root.children.map(x=>`<span>${escapeHtml(x.name)}</span>`).join("")}</div>`;$("resultStatus").textContent="READ STATE ✓";return true}
+ if(n==="exists()"){const target=selectedPath||"presentation.pptx";$("resultBody").innerHTML=`<code dir="ltr">Path("${escapeHtml(target)}").exists()</code><br><b class="live-true">${findChild(target)?"True":"False"}</b>`;$("resultStatus").textContent="READ STATE ✓";return true}
+ return false}
+
 init();
