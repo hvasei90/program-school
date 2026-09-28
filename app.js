@@ -257,7 +257,38 @@ function selectLib(id){
   document.querySelectorAll(".help-btn").forEach(b=>b.onclick=e=>{e.stopPropagation();openModal(l.tools[+b.dataset.help],l)});
   renderNav(); renderCards(); $("labSection").scrollIntoView({behavior:"smooth",block:"start"});
 }
-function addTool(t,l){state.chain.push({lib:l.name,tool:t});renderChain();if(!statePreview(t,l))preview(t,l)}
+function parseSignatureArgs(signature){
+  const m=signature.match(/\((.*)\)/); if(!m)return [];
+  const body=m[1].trim(); if(!body || body==="..." || body==="—")return [];
+  return body.split(",").map(x=>x.trim()).filter(Boolean).map(x=>x.replace(/\s*=.*$/,""));
+}
+function askToolArgs(t){
+  const args=parseSignatureArgs(t[2]); if(!args.length)return {};
+  const values={};
+  for(const arg of args){
+    const optional=/optional|None|اختیاری/i.test(t[3]+" "+t[2]) && arg!==args[0];
+    let label=arg.replace(/\*/g,"");
+    let def="";
+    if(arg==="path"||arg==="filename"||arg==="source"||arg==="url"||arg==="name"||arg==="src"||arg==="dst"||arg==="f1"||arg==="f2"||arg==="pdf_path") def=selectedPath||"";
+    if(arg==="pattern") def="*.txt";
+    if(arg==="text") def="Hello Python";
+    if(arg==="seconds") def="2";
+    const v=prompt(`مقدار ${label} را وارد کن${optional?" (اختیاری)":""}:`,def);
+    if(v===null)return null;
+    if(v!=="" || !optional) values[arg]=v;
+  }
+  return values;
+}
+function fillSignature(signature,args){
+  return signature.replace(/([A-Za-z_][\w]*)\s*=\s*[^,)]+/g,"$1").replace(/([A-Za-z_][\w]*)/g,(m)=>Object.prototype.hasOwnProperty.call(args,m)?JSON.stringify(args[m]):m);
+}
+function addTool(t,l){
+  const args=askToolArgs(t); if(args===null)return;
+  const customized=[t[0],t[1],fillSignature(t[2],args),t[3],t[4],t[5],args];
+  state.chain.push({lib:l.name,tool:customized,args});
+  renderChain();
+  if(!statePreview(customized,l,args))preview(customized,l,args);
+}
 function renderChain(){
   const c=$("chain");
   if(!state.chain.length){c.className="chain empty";c.innerHTML=`<div class="empty-chain"><div class="drop-icon">＋</div><b>بلوک‌ها را اینجا جمع کن</b><span>با کلیک روی هر ابزار، یک بلوک به کد اضافه می‌شود.</span></div>`;generateCode();return;}
@@ -329,12 +360,17 @@ function iconFor(x){if(x.type==="folder")return "📁";if(x.kind==="image")retur
 function findChild(n){return VFS.root.children.find(x=>x.name===n)}
 function renderFileExplorer(){const el=document.getElementById("liveExplorer");if(!el)return;const a=VFS.root.children;el.innerHTML=`<div class="explorer-head"><div><span class="eyebrow">VIRTUAL FILE EXPLORER</span><b>PythonLab /</b></div><button class="reset-files" type="button" id="resetFiles">↻ بازنشانی</button></div><div class="explorer-toolbar"><span>📁 ${a.filter(x=>x.type==="folder").length} پوشه</span><span>•</span><span>📄 ${a.filter(x=>x.type==="file").length} فایل</span></div><div class="file-grid">${a.map(x=>`<button type="button" class="file-item ${selectedPath===x.name?"selected":""}" data-file="${escapeHtml(x.name)}"><span class="big-file-icon">${iconFor(x)}</span><span class="file-name">${escapeHtml(x.name)}</span><span class="file-meta">${x.type==="folder"?(x.children?.length||0)+" مورد":x.size}</span></button>`).join("")}${a.length===0?'<div class="empty-files">پوشه خالی است.</div>':''}</div>`;document.querySelectorAll(".file-item").forEach(b=>b.onclick=()=>{selectedPath=b.dataset.file;renderFileExplorer();renderLiveLog(`انتخاب شد: ${b.dataset.file}`)});document.getElementById("resetFiles").onclick=resetVirtualFS}
 function renderLiveLog(msg){if(msg)liveLog.unshift({time:new Date().toLocaleTimeString("fa-IR",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),msg});const e=document.getElementById("liveLog");if(e)e.innerHTML=liveLog.slice(0,7).map(x=>`<div class="log-line"><span>${x.time}</span><b>${escapeHtml(x.msg)}</b></div>`).join("")||'<div class="empty-log">هنوز دستوری اجرا نشده است.</div>'}
-function statePreview(t){const n=t[0];
- if(n==="remove()"){const target=selectedPath||"presentation.pptx",i=VFS.root.children.findIndex(x=>x.name===target);if(i<0){toast("فایل پیدا نشد.");return true}VFS.root.children.splice(i,1);renderFileExplorer();renderLiveLog(`os.remove("${target}") → حذف شد`);$("resultBody").innerHTML=`<div class="live-success">✓ فایل از File Explorer نمایشی حذف شد</div><p><code dir="ltr">os.remove("${escapeHtml(target)}")</code></p><div class="state-count">اکنون ${VFS.root.children.length} آیتم باقی مانده است.</div>`;$("resultStatus").textContent="STATE UPDATED ✓";return true}
- if(n==="mkdir()"||n==="makedirs()"){const name=prompt(n==="mkdir()"?"نام پوشه:":"مسیر پوشه‌های تو‌در‌تو:",n==="mkdir()"?"new_folder":"project/data/output");if(name!==null){let f=VFS.root;for(const part of name.split("/").map(x=>x.trim()).filter(Boolean)){let q=f.children.find(x=>x.type==="folder"&&x.name===part);if(!q){q={type:"folder",name:part,children:[]};f.children.push(q)}f=q}renderFileExplorer();renderLiveLog(`${n} → ${name} ساخته شد`);$("resultBody").innerHTML=`<div class="live-success">📁 ساختار پوشه ساخته شد</div><p><code dir="ltr">os.${n==="mkdir()"?`mkdir("${escapeHtml(name)}")`:`makedirs("${escapeHtml(name)}")`}</code></p>`;$("resultStatus").textContent="FOLDER CREATED ✓"}return true}
- if(n==="rename()"){const target=selectedPath||"presentation.pptx",x=findChild(target);if(!x){toast("اول یک فایل را انتخاب کن.");return true}const name=prompt("نام جدید:",target);if(name&&name.trim()){x.name=name.trim();selectedPath=x.name;renderFileExplorer();renderLiveLog(`${target} → ${x.name}`);$("resultBody").innerHTML=`<div class="live-success">✓ نام فایل تغییر کرد</div><p><code dir="ltr">os.rename("${escapeHtml(target)}","${escapeHtml(x.name)}")</code></p>`;$("resultStatus").textContent="RENAMED ✓"}return true}
- if(n==="listdir()"){$("resultBody").innerHTML=`<div class="state-list">${VFS.root.children.map(x=>`<span>${escapeHtml(x.name)}</span>`).join("")}</div>`;$("resultStatus").textContent="READ STATE ✓";return true}
- if(n==="exists()"){const target=selectedPath||"presentation.pptx";$("resultBody").innerHTML=`<code dir="ltr">Path("${escapeHtml(target)}").exists()</code><br><b class="live-true">${findChild(target)?"True":"False"}</b>`;$("resultStatus").textContent="READ STATE ✓";return true}
+function statePreview(t,l,args={}){const n=t[0];
+ const val=(k,f="")=>Object.prototype.hasOwnProperty.call(args,k)?String(args[k]):f;
+ if(n==="remove()"){const target=val("path",selectedPath||"");const i=VFS.root.children.findIndex(x=>x.name===target);if(i<0){toast(`فایل یا پوشه «${target}» پیدا نشد.`);return true}VFS.root.children.splice(i,1);if(selectedPath===target)selectedPath=null;renderFileExplorer();renderLiveLog(`os.remove("${target}") → حذف شد`);$("resultBody").innerHTML=`<div class="live-success">✓ «${escapeHtml(target)}» از File Explorer نمایشی حذف شد</div><p><code dir="ltr">os.remove("${escapeHtml(target)}")</code></p><div class="state-count">اکنون ${VFS.root.children.length} آیتم باقی مانده است.</div>`;$("resultStatus").textContent="STATE UPDATED ✓";return true}
+ if(n==="mkdir()"||n==="makedirs()"){const name=val("path");if(!name)return true;let f=VFS.root;for(const part of name.split("/").map(x=>x.trim()).filter(Boolean)){let q=f.children.find(x=>x.type==="folder"&&x.name===part);if(!q){q={type:"folder",name:part,children:[]};f.children.push(q)}f=q}renderFileExplorer();renderLiveLog(`${n} → ${name} ساخته شد`);$("resultBody").innerHTML=`<div class="live-success">📁 ساختار «${escapeHtml(name)}» ساخته شد</div><p><code dir="ltr">os.${n==="mkdir()"?`mkdir(${JSON.stringify(name)})`:`makedirs(${JSON.stringify(name)})`}</code></p>`;$("resultStatus").textContent="FOLDER CREATED ✓";return true}
+ if(n==="rename()"){const target=val("src",selectedPath||"");const dest=val("dst");const x=findChild(target);if(!x){toast(`«${target}» پیدا نشد.`);return true}if(!dest)return true;x.name=dest;selectedPath=dest;renderFileExplorer();renderLiveLog(`${target} → ${dest}`);$("resultBody").innerHTML=`<div class="live-success">✓ «${escapeHtml(target)}» به «${escapeHtml(dest)}» تغییر نام داد</div><p><code dir="ltr">os.rename(${JSON.stringify(target)}, ${JSON.stringify(dest)})</code></p>`;$("resultStatus").textContent="RENAMED ✓";return true}
+ if(n==="listdir()"){const path=val("path","");$("resultBody").innerHTML=`<div class="state-list">${VFS.root.children.map(x=>`<span>${escapeHtml(x.name)}</span>`).join("")}</div><p>مسیر انتخابی: <code dir="ltr">${escapeHtml(path||".")}</code></p>`;$("resultStatus").textContent="READ STATE ✓";return true}
+ if(n==="exists()"){const target=val("path",selectedPath||"");$("resultBody").innerHTML=`<code dir="ltr">Path(${JSON.stringify(target)}).exists()</code><br><b class="live-true">${findChild(target)?"True":"False"}</b>`;$("resultStatus").textContent="READ STATE ✓";return true}
+ if(n==="send2trash()"){const target=val("path",selectedPath||"");const i=VFS.root.children.findIndex(x=>x.name===target);if(i<0){toast(`«${target}» پیدا نشد.`);return true}VFS.root.children.splice(i,1);selectedPath=null;renderFileExplorer();renderLiveLog(`send2trash("${target}") → انتقال به سطل زباله`);$("resultBody").innerHTML=`<div class="live-success">♻ «${escapeHtml(target)}» به سطل زباله‌ی نمایشی منتقل شد</div><p><code dir="ltr">send2trash(${JSON.stringify(target)})</code></p>`;$("resultStatus").textContent="TRASHED ✓";return true}
+ if(n==="copy()"||n==="move()"){const src=val("src");const dst=val("dst");const x=findChild(src);if(!x){toast(`«${src}» پیدا نشد.`);return true}if(!dst)return true;const copy=JSON.parse(JSON.stringify(x));copy.name=dst.split("/").pop();if(n==="copy()")VFS.root.children.push(copy);else{x.name=copy.name}renderFileExplorer();renderLiveLog(`${n} ${src} → ${dst}`);$("resultBody").innerHTML=`<div class="live-success">✓ ${n==="copy()"?"یک کپی ایجاد شد":"آیتم جابه‌جا شد"}</div><p><code dir="ltr">shutil.${n}${JSON.stringify(src)}, ${JSON.stringify(dst)})</code></p>`;$("resultStatus").textContent="STATE UPDATED ✓";return true}
+ if(n==="rmtree()"){const target=val("path");const i=VFS.root.children.findIndex(x=>x.name===target&&x.type==="folder");if(i<0){toast(`پوشه «${target}» پیدا نشد.`);return true}VFS.root.children.splice(i,1);selectedPath=null;renderFileExplorer();renderLiveLog(`shutil.rmtree("${target}") → حذف پوشه`);$("resultBody").innerHTML=`<div class="live-success">✓ پوشه «${escapeHtml(target)}» و محتویات نمایشی آن حذف شد</div>`;$("resultStatus").textContent="STATE UPDATED ✓";return true}
+ if(n==="fnmatch()"){$("resultBody").innerHTML=`<code dir="ltr">fnmatch(${JSON.stringify(val("name"))}, ${JSON.stringify(val("pattern","*.txt"))})</code><br>نتیجه: <b style="color:#6ee7d8">${new RegExp("^"+val("pattern","*").replace(/[.+^${}()|[\]\\]/g,"\\$&").replace(/\*/g,".*").replace(/\?/g,".")+"$").test(val("name"))}</b>`;$("resultStatus").textContent="EXECUTED ✓";return true}
  return false}
 
 init();
